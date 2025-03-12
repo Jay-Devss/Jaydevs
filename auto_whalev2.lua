@@ -1,12 +1,179 @@
---[[
- .____                  ________ ___.    _____                           __                
- |    |    __ _______   \_____  \\_ |___/ ____\_ __  ______ ____ _____ _/  |_  ___________ 
- |    |   |  |  \__  \   /   |   \| __ \   __\  |  \/  ___// ___\\__  \\   __\/  _ \_  __ \
- |    |___|  |  // __ \_/    |    \ \_\ \  | |  |  /\___ \\  \___ / __ \|  | (  <_> )  | \/
- |_______ \____/(____  /\_______  /___  /__| |____//____  >\___  >____  /__|  \____/|__|   
-         \/          \/         \/    \/                \/     \/     \/                   
-          \_Welcome to LuaObfuscator.com   (Alpha 0.10.8) ~  Much Love, Ferib 
+local jay = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua", true))()
 
-]]--
+if getgenv().jaydevs_autototem then 
+    jay:Notify({ Title = "⚠️ Script Already Running", Content = "Auto Summon Whale Event script is already running!", Duration = 4 })
+    return 
+end
+getgenv().jaydevs_autototem = true
 
-local v0=tonumber;local v1=string.byte;local v2=string.char;local v3=string.sub;local v4=string.gsub;local v5=string.rep;local v6=table.concat;local v7=table.insert;local v8=math.ldexp;local v9=getfenv or function() return _ENV;end ;local v10=setmetatable;local v11=pcall;local v12=select;local v13=unpack or table.unpack ;local v14=tonumber;local function v15(v16,v17,...) local v18=1;local v19;v16=v4(v3(v16,5),"..",function(v30) if (v1(v30,2)==81) then local v87=0;while true do if (0==v87) then v19=v0(v3(v30,1,1));return "";end end else local v88=0;local v89;while true do if (v88==0) then v89=v2(v0(v30,16));if v19 then local v130=0;local v131;while true do if (v130==1) then return v131;end if (v130==0) then v131=v5(v89,v19);v19=nil;v130=1;end end else return v89;end break;end end end end);local function v20(v31,v32,v33) if v33 then local v90=(v31/((5 -3)^(v32-(2 -1))))%((879 -(282 + 595))^(((v33-(1 -0)) -(v32-(2 -1))) + (620 -((2192 -(1523 + 114)) + 64)))) ;return v90-(v90%(932 -(857 + 67 + 7))) ;else local v91=(570 -(367 + 201))^(v32-(928 -(214 + 713))) ;return (((v31%(v91 + v91))>=v91) and (1 + 0)) or (0 + 0) ;end end local function v21() local v34=v1(v16,v18,v18);v18=v18 + 1 ;return v34;end local function v22() local v35=0 -(0 -0) ;local v36;local v37;while true do if (v35==(1066 -(68 + 997))) then return (v37 * (1526 -(226 + 1044))) + v36 ;end if (v35==(0 -0)) then v36,v37=v1(v16,v18,v18 + (4 -2) );v18=v18 + ((469 -(87 + 263)) -(32 + 85)) ;v35=1 -0 ;end end end local function v23() local v38=0;local v39;local v40;local v41;local v42;while true do if (v38==(181 -(67 + 113))) then return (v42 * (12302277 + 4474939)) + (v41 * (160901 -95365)) + (v40 * (189 + (120 -53))) + v39 ;end if (v38==0) then v39,v40,v41,v42=v1(v16,v18,v18 + (11 -8) );v18=v18 + (956 -(802 + 150)) ;v38=2 -1 ;end end end local function v24() local v43=0 + 0 ;local v44;local v45;local v46;local v47;local v48;local v49;while true do if ((999 -(915 + (854 -(201 + 571))))==v43) then v48=v20(v45,21,87 -56 );v49=((v20(v45,19 + 13 )==((1139 -(116 + 1022)) -0)) and  -(4 -3)) or ((698 + 490) -(1069 + (430 -312))) ;v43=6 -3 ;end if (v43==(6 -(10 -7))) then if (v48==(0 + 0)) then if (v47==(0 -0)) then return v49 * (0 + 0) ;else v48=792 -(368 + 423) ;v46=0 -0 ;end elseif (v48==2047) then return ((v47==0) and (v49 * ((19 -(10 + 8))/0))) or (v49 * NaN) ;end return v8(v49,v48-(3934 -2911) ) * (v46 + (v47/((444 -(416 + 26))^(165 -113)))) ;end if (v43==0) then v44=v23();v45=v23();v43=1 + 0 ;end if (v43==(1 -0)) then v46=439 -((1004 -(814 + 45)) + 293) ;v47=(v20(v45,431 -(44 + 386) ,1506 -(998 + 488) ) * ((1 + 1)^32)) + v44 ;v43=2 + 0 ;end end end local function v25(v50) local v51=(0 -0) -0 ;local v52;local v53;while true do if (2==v51) then v53={};for v118=1 + (1747 -(760 + 987)) , #v52 do v53[v118]=v2(v1(v3(v52,v118,v118)));end v51=2 + 1 ;end if ((888 -(261 + 624))==v51) then return v6(v53);end if (v51==((1914 -(1789 + 124)) -0)) then v52=v3(v16,v18,(v18 + v50) -1 );v18=v18 + v50 ;v51=1082 -(1020 + 60) ;end if (v51==(1423 -(630 + 793))) then v52=nil;if  not v50 then local v124=0 -0 ;while true do if (v124==0) then v50=v23();if (v50==((766 -(745 + 21)) -0)) then return "";end break;end end end v51=1 + 0 ;end end end local v26=v23;local function v27(...) return {...},v12("#",...);end local function v28() local v54=(function() return function(v92,v93,v94,v95,v96,v97,v98,v99) local v92=(function() return 1171 -(418 + 753) ;end)();local v93=(function() return;end)();local v94=(function() return;end)();while true do if (v92~= #",") then else if (v93== #"\\") then v94=(function() return v95()~=(0 + 0) ;end)();elseif (v93==2) then v94=(function() return v96();end)();elseif (v93~= #"-19") then else v94=(function() return v97();end)();end v98[v99]=(function() return v94;end)();break;end if (v92~=(241 -(187 + 54))) then else local v126=(function() return 0 + 0 ;end)();local v127=(function() return;end)();while true do if ((780 -(162 + 618))==v126) then v127=(function() return 0 + 0 ;end)();while true do if (v127==(1 + 0)) then v92=(function() return  #"]";end)();break;end if (v127~=(0 + 0)) then else v93=(function() return v95();end)();v94=(function() return nil;end)();v127=(function() return 1 -0 ;end)();end end break;end end end end return v92,v93,v94,v95,v96,v97,v98,v99;end;end)();local v55=(function() return function(v100,v101,v102,v103,v104,v105,v106,v107,v108) local v109=(function() return 529 -(406 + 123) ;end)();local v100=(function() return;end)();local v101=(function() return;end)();while true do local v117=(function() return 0;end)();while true do if (v117~=(0 -0)) then else if (v109~=(1 + 0)) then else local v132=(function() return 1636 -(1373 + 263) ;end)();while true do if (v132==(1000 -(451 + 549))) then local v134=(function() return 0 + 0 ;end)();while true do if (v134~=(1322 -(1249 + 73))) then else while true do if (v100~=(0 + 0)) then else v101=(function() return v102();end)();if (v103(v101, #"<", #" ")~=(0 -0)) then else local v414=(function() return 0;end)();local v415=(function() return;end)();local v416=(function() return;end)();local v417=(function() return;end)();local v418=(function() return;end)();while true do if (v414~=(0 -0)) then else local v810=(function() return 0 -0 ;end)();while true do if (v810~=0) then else v415=(function() return 0;end)();v416=(function() return nil;end)();v810=(function() return 1385 -(746 + 638) ;end)();end if (v810~=1) then else v414=(function() return 1 + 0 ;end)();break;end end end if (v414==(1 -0)) then local v811=(function() return 341 -(218 + 123) ;end)();while true do if (v811==1) then v414=(function() return 1583 -(1535 + 46) ;end)();break;end if (v811~=0) then else v417=(function() return nil;end)();v418=(function() return nil;end)();v811=(function() return 1;end)();end end end if (v414==(2 + 0)) then while true do if (v415== #"91(") then if (v103(v417, #"-19", #"nil")== #"[") then v418[ #"xnxx"]=(function() return v104[v418[ #"0313"]];end)();end v105[v106]=(function() return v418;end)();break;end if (v415==(0 + 0)) then local v891=(function() return 560 -(306 + 254) ;end)();local v892=(function() return;end)();while true do if (v891==(114 -(4 + 110))) then v892=(function() return 0 + 0 ;end)();while true do if (v892==(1 -0)) then v415=(function() return  #":";end)();break;end if ((1427 -(41 + 1386))==v892) then v416=(function() return v103(v101,1469 -(899 + 568) , #"xxx");end)();v417=(function() return v103(v101, #".com",109 -(17 + 86) );end)();v892=(function() return 1 + 0 ;end)();end end break;end end end if (v415==(2 + 0)) then local v893=(function() return 0 -0 ;end)();local v894=(function() return;end)();while true do if (v893==(0 -0)) then v894=(function() return 603 -(268 + 335) ;end)();while true do if (v894==0) then if (v103(v417, #"<", #":")== #"]") then v418[2 -0 ]=(function() return v104[v418[2]];end)();end if (v103(v417,292 -(60 + 230) ,2)== #"[") then v418[ #"19("]=(function() return v104[v418[ #"19("]];end)();end v894=(function() return 573 -(426 + 146) ;end)();end if ((1 + 0)~=v894) then else v415=(function() return  #"xxx";end)();break;end end break;end end end if (v415~= #":") then else local v895=(function() return 0 + 0 ;end)();local v896=(function() return;end)();while true do if ((1456 -(282 + 1174))~=v895) then else v896=(function() return 0 + 0 ;end)();while true do if (v896==(812 -(569 + 242))) then v415=(function() return 1259 -(1043 + 214) ;end)();break;end if ((0 -0)==v896) then v418=(function() return {v107(),v107(),nil,nil};end)();if (v416==0) then local v911=(function() return 0 -0 ;end)();local v912=(function() return;end)();while true do if (v911==(0 -0)) then v912=(function() return 0 + 0 ;end)();while true do if ((320 -(53 + 267))~=v912) then else v418[ #"xxx"]=(function() return v107();end)();v418[ #"http"]=(function() return v107();end)();break;end end break;end end elseif (v416== #"[") then v418[ #"asd"]=(function() return v108();end)();elseif (v416==(1 + 1)) then v418[ #"19("]=(function() return v108() -((1026 -(706 + 318))^(1267 -(721 + 530))) ;end)();elseif (v416== #"asd") then local v917=(function() return 1271 -(945 + 326) ;end)();local v918=(function() return;end)();while true do if (v917==0) then v918=(function() return 0 -0 ;end)();while true do if (v918~=(0 + 0)) then else v418[ #"asd"]=(function() return v108() -((2 + 0)^(866 -(20 + 830))) ;end)();v418[ #"0836"]=(function() return v107();end)();break;end end break;end end end v896=(function() return 701 -(271 + 429) ;end)();end end break;end end end end break;end end end break;end end return v100,v101,v102,v103,v104,v105,v106,v107,v108;end end end end end if (v109==(0 + 0)) then v100=(function() return 0;end)();v101=(function() return nil;end)();v109=(function() return 1501 -(1408 + 92) ;end)();end break;end end end end;end)();local v56=(function() return function(v110,v111,v112) local v113=(function() return 1086 -(461 + 625) ;end)();local v114=(function() return;end)();while true do if (v113==0) then v114=(function() return 126 -(116 + 10) ;end)();while true do if (v114~=(1288 -(993 + 295))) then else local v133=(function() return 0;end)();while true do if (v133~=(0 + 0)) then else local v135=(function() return 738 -(542 + 196) ;end)();while true do if (v135==(0 -0)) then v110[v111-#"/" ]=(function() return v112();end)();return v110,v111,v112;end end end end end end break;end end end;end)();local v57=(function() return {};end)();local v58=(function() return {};end)();local v59=(function() return {};end)();local v60=(function() return {v57,v58,nil,v59};end)();local v61=(function() return v23();end)();local v62=(function() return {};end)();for v70= #" ",v61 do FlatIdent_87441,Type,Cons,v21,v24,v25,v62,v70=(function() return v54(FlatIdent_87441,Type,Cons,v21,v24,v25,v62,v70);end)();end v60[ #"xnx"]=(function() return v21();end)();for v71= #"[",v23() do FlatIdent_940A0,Descriptor,v21,v20,v62,v57,v71,v22,v23=(function() return v55(FlatIdent_940A0,Descriptor,v21,v20,v62,v57,v71,v22,v23);end)();end for v72= #"[",v23() do v58,v72,v28=(function() return v56(v58,v72,v28);end)();end return v60;end local function v29(v64,v65,v66) local v67=v64[1 + 0 ];local v68=v64[2 + 0 ];local v69=v64[2 + (2 -1) ];return function(...) local v73=v67;local v74=v68;local v75=v69;local v76=v27;local v77=2 -1 ;local v78= -(2 -1);local v79={};local v80={...};local v81=v12("#",...) -(406 -(118 + 287)) ;local v82={};local v83={};for v115=0 -0 ,v81 do if (v115>=v75) then v79[v115-v75 ]=v80[v115 + (1122 -(76 + 42 + 1003)) ];else v83[v115]=v80[v115 + (2 -1) ];end end local v84=(v81-v75) + 1 ;local v85;local v86;while true do local v116=377 -(142 + 235) ;while true do if (v116==(0 -0)) then v85=v73[v77];v86=v85[1 + 0 ];v116=978 -(553 + 424) ;end if ((v116==(1 -0)) or (2647<=2043)) then if ((v86<=(31 + 4)) or (354>=1534)) then if (v86<=(17 + 0)) then if (v86<=(5 + 0 + 1 + 2)) then if (v86<=3) then if (v86<=1) then if (v86>(0 + 0)) then local v137=0;local v138;local v139;while true do if (v137==(53 -(33 + 19))) then for v791=1 + 0 , #v82 do local v792=v82[v791];for v812=0 -0 , #v792 do local v813=0 -0 ;local v814;local v815;local v816;while true do if (v813==1) then v816=v814[4 -2 ];if (((v815==v83) and (v816>=v138)) or (3764>=4876)) then local v903=0 + 0 ;while true do if ((3676>=703) and (v903==0)) then v139[v816]=v815[v816];v814[4 -3 ]=v139;break;end end end break;end if ((3811>319) and (v813==(0 + 0))) then v814=v792[v812];v815=v814[1];v813=754 -(239 + 514) ;end end end end break;end if (v137==(0 + 0)) then v138=v85[(3989 -2658) -(797 + 532) ];v139={};v137=1 + 0 ;end end else local v140=0 + 0 ;local v141;local v142;while true do if ((2 -1)==v140) then v83[v141 + 1 ]=v142;v83[v141]=v142[v85[1206 -(373 + 829) ]];break;end if (v140==((323 + 408) -(476 + 255))) then v141=v85[1132 -(369 + 761) ];v142=v83[v85[2 + 1 ]];v140=1;end end end elseif (v86>(2 -0)) then local v143=v85[(5 -2) -1 ];v83[v143](v13(v83,v143 + (239 -(64 + 174)) ,v85[1 + 2 ]));else local v144;v83[v85[2]]=v83[v85[3]][v85[5 -1 ]];v77=v77 + 1 + 0 ;v85=v73[v77];v83[v85[338 -(144 + (881 -(586 + 103))) ]]=v85[3];v77=v77 + (217 -(42 + 174)) ;v85=v73[v77];v144=v85[2 + 0 ];v83[v144](v83[v144 + 1 + 0 + 0 ]);v77=v77 + 1 ;v85=v73[v77];v83[v85[1 + 1 ]][v85[3]]=v83[v85[4]];v77=v77 + 1 ;v85=v73[v77];v83[v85[1506 -(363 + 1141) ]]=v85[1583 -(1183 + (1221 -824)) ];end elseif (v86<=(1493 -(1309 + 179))) then if ((47<1090) and (v86>((19 -8) -7))) then local v155;local v156;v156=v85[2 + 0 ];v155=v83[v85[3 + 0 ]];v83[v156 + (1976 -(833 + 1080 + 62)) ]=v155;v83[v156]=v155[v85[(7 -4) + 1 ]];v77=v77 + (2 -1) ;v85=v73[v77];v83[v85[1935 -(565 + 1368) ]]=v85[3];v77=v77 + 1 ;v85=v73[v77];v156=v85[2 + 0 ];v83[v156]=v83[v156](v13(v83,v156 + (3 -(3 -1)) ,v85[1664 -(1477 + 184) ]));v77=v77 + (1 -0) ;v85=v73[v77];v83[v85[2]]=v83[v85[3 + 0 ]][v85[860 -(564 + (581 -289)) ]];v77=v77 + (1 -0) ;v85=v73[v77];v83[v85[2]]=v83[v85[3]][v85[11 -7 ]];v77=v77 + (305 -((853 -(295 + 314)) + 60)) ;v85=v73[v77];v155=v83[v85[4]];if  not v155 then v77=v77 + 1 ;else v83[v85[(4 -2) + 0 ]]=v155;v77=v85[3];end else v77=v85[479 -(41 + (2397 -(1300 + 662))) ];end elseif ((v86<=6) or (1371>=2900)) then if (v83[v85[1003 -(938 + (197 -134)) ]]~=v85[4 + 0 ]) then v77=v77 + (1126 -(936 + 189)) ;else v77=v85[1 + 2 ];end elseif (v86>(1620 -(1565 + (1803 -(1178 + 577))))) then v83[v85[2 + 0 ]]=v66[v85[1141 -(407 + 375 + 356) ]];else v83[v85[(794 -525) -(176 + 91) ]]=v85[3];end elseif ((v86<=12) or (1126<=504)) then if (v86<=10) then if (v86==(23 -14)) then if  not v83[v85[2]] then v77=v77 + (1 -0) ;else v77=v85[1095 -(975 + 117) ];end else v83[v85[1877 -(157 + 1718) ]][v85[3 + 0 ]]=v85[4];end elseif (v86>(1416 -(851 + 554))) then local v172=0;local v173;while true do if (((28 -20)==v172) or (3732==193)) then v173=v85[6 -4 ];v83[v173]=v83[v173]();v77=v77 + (1019 -(697 + 321)) ;v172=8 + 1 ;end if (v172==(2 -1)) then v85=v73[v77];v83[v85[3 -1 ]]=v85[3];v77=v77 + (2 -1) ;v172=1 + 1 ;end if (v172==(5 -2)) then v77=v77 + (2 -1) ;v85=v73[v77];v83[v85[1229 -(322 + (2509 -1604)) ]]=v65[v85[3]];v172=615 -(602 + 9) ;end if ((1191 -(449 + 740))==v172) then v85=v73[v77];v173=v85[874 -(826 + (99 -53)) ];v83[v173](v83[v173 + 1 ]);v172=950 -(245 + (1004 -(115 + 187))) ;end if (v172==(12 -(7 + 1))) then v77=v77 + 1 + 0 ;v85=v73[v77];v83[v85[1900 -(260 + 1638) ]]=v85[3];v172=445 -(382 + 58) ;end if (v172==7) then v83[v85[6 -4 ]]=v65[v85[3 + 0 + 0 ]];v77=v77 + (1 -0) ;v85=v73[v77];v172=23 -(59 -44) ;end if ((3344>=3305) and ((1211 -(902 + 303))==v172)) then v83[v173](v83[v173 + (1 -0) ]);v77=v77 + (2 -1) ;v85=v73[v77];v172=7;end if (v172==(0 + 0)) then v173=nil;v83[v85[2]]=v83[v85[3]][v85[4]];v77=v77 + (1691 -(1121 + 569)) ;v172=215 -(22 + (1353 -(160 + 1001))) ;end if ((v172==(688 -(483 + 200))) or (2885<1925)) then v77=v77 + (1464 -(1404 + 59)) ;v85=v73[v77];v173=v85[2];v172=16 -10 ;end if (((11 -2)==v172) or (4542<=1594)) then v85=v73[v77];if ((338<=3505) and v83[v85[2]]) then v77=v77 + (766 -(410 + 58 + 205 + 92)) ;else v77=v85[565 -(334 + 228) ];end break;end end else local v174=v83[v85[13 -9 ]];if  not v174 then v77=v77 + (2 -1) ;else v83[v85[2]]=v174;v77=v85[5 -(3 -1) ];end end elseif ((69==69) and (v86<=(4 + 10))) then if (v86>((607 -(237 + 121)) -(141 + (992 -(525 + 372))))) then local v175=0 -0 ;local v176;while true do if (v175==2) then v85=v73[v77];v176=v85[2 + 0 ];v83[v176](v83[v176 + (2 -1) ]);v175=3;end if ((v175==(0 -0)) or (672==368)) then v176=nil;v83[v85[1 + 1 ]]=v83[v85[8 -5 ]][v85[(9 -6) + 1 ]];v77=v77 + 1 ;v175=1 + 0 ;end if (v175==((146 -(96 + 46)) -1)) then v77=v77 + 1 + 0 ;v85=v73[v77];v83[v85[165 -(92 + 71) ]]=v65[v85[2 + (778 -(643 + 134)) ]];v175=6 -2 ;end if (v175==(769 -(574 + 191))) then v77=v77 + 1 + 0 ;v85=v73[v77];v83[v85[4 -2 ]]=v85[2 + 1 ];v175=854 -(254 + 595) ;end if (v175==(133 -(55 + 71))) then v83[v85[2 -0 ]]=v83[v85[3]];v77=v77 + 1 ;v85=v73[v77];v175=1798 -(573 + 440 + 777) ;end if ((1019==1019) and ((16 -10)==v175)) then v83[v176]=v83[v176](v83[v176 + 1 + 0 ]);v77=v77 + ((2 -1) -(0 -0)) ;v85=v73[v77];v175=946 -(714 + 225) ;end if (5==v175) then v77=v77 + 1 ;v85=v73[v77];v176=v85[5 -3 ];v175=6;end if (v175==(1 -0)) then v85=v73[v77];v83[v85[1 + 1 + 0 ]]=v85[3 -0 ];v77=v77 + (807 -(118 + 688)) ;v175=50 -(25 + 23) ;end if ((v175==8) or (290>2746)) then v77=v85[1 + (3 -1) ];break;end end else v83[v85[1888 -(927 + 959) ]]=v83[v85[(20 -10) -7 ]][v83[v85[736 -(16 + 716) ]]];end elseif ((1923<4601) and (v86<=(28 -13))) then local v179=97 -(11 + 86) ;local v180;local v181;local v182;while true do if ((v179==(2 -1)) or (3957==2099)) then v182={};v181=v10({},{__index=function(v793,v794) local v795=285 -(175 + 110) ;local v796;while true do if (v795==(0 -0)) then v796=v182[v794];return v796[1][v796[9 -7 ]];end end end,__newindex=function(v797,v798,v799) local v800=1796 -(503 + 1293) ;local v801;while true do if (v800==0) then v801=v182[v798];v801[2 -1 ][v801[2 + 0 ]]=v799;break;end end end});v179=1063 -(810 + 251) ;end if ((4006>741) and (v179==(2 + 0))) then for v802=1,v85[2 + (5 -3) ] do local v803=0 + 0 + 0 ;local v804;while true do if ((2359<=3733) and (v803==(534 -(43 + 490)))) then if (v804[1]==((1911 -1152) -(711 + 22))) then v182[v802-(3 -2) ]={v83,v804[4 -1 ]};else v182[v802-(1 + 0 + 0) ]={v65,v804[408 -(255 + 150) ]};end v82[ #v82 + 1 + 0 ]=v182;break;end if (v803==(0 + 0)) then v77=v77 + (4 -3) ;v804=v73[v77];v803=3 -2 ;end end end v83[v85[2]]=v29(v180,v181,v66);break;end if (v179==(1739 -(404 + 1335))) then v180=v74[v85[409 -(183 + 223) ]];v181=nil;v179=(3 -2) -0 ;end end elseif (v86>(11 + 5)) then v83[v85[2]]=v65[v85[3]];else local v431=0 + 0 ;local v432;while true do if ((0==v431) or (4596<=2402)) then v432=v85[(1618 -1279) -(10 + 327) ];v83[v432](v83[v432 + 1 + 0 ]);break;end end end elseif (v86<=((755 -391) -(118 + 220))) then if (v86<=(7 + 1 + 13)) then if (v86<=19) then if (v86>(467 -(108 + 341))) then for v405=v85[1 + 1 ],v85[12 -9 ] do v83[v405]=nil;end else do return v83[v85[1495 -(711 + 782) ]];end end elseif (v86==((74 -36) -18)) then local v183=469 -(270 + 199) ;local v184;local v185;while true do if (v183==(1 + 1 + 0)) then v184=v83[v85[1822 -(580 + 1239) ]];v83[v185 + (2 -(2 -1)) ]=v184;v83[v185]=v184[v85[4 + 0 ]];v183=1 + 2 ;end if (v183==6) then v83[v85[1 + (18 -(12 + 5)) ]]=v83[v85[7 -4 ]];break;end if ((2078>163) and (v183==(3 + (3 -2)))) then v77=v77 + (1168 -((1375 -730) + 522)) ;v85=v73[v77];v185=v85[2];v183=1795 -(1010 + 780) ;end if ((4116>737) and (v183==(3 + 0))) then v77=v77 + (4 -3) ;v85=v73[v77];v83[v85[(10 -5) -3 ]]=v85[1839 -(1045 + 791) ];v183=9 -5 ;end if (v183==(1 -0)) then v77=v77 + (506 -((870 -519) + 154)) ;v85=v73[v77];v185=v85[1576 -(1281 + 293) ];v183=268 -(28 + 238) ;end if (v183==0) then v184=nil;v185=nil;v83[v85[4 -2 ]]=v83[v85[1562 -(1381 + 178) ]][v85[4]];v183=1 + 0 ;end if (v183==(2 + 3 + 0)) then v83[v185]=v83[v185](v13(v83,v185 + 1 + (1973 -(1656 + 317)) ,v85[10 -7 ]));v77=v77 + 1 + 0 ;v85=v73[v77];v183=476 -(381 + 89) ;end end else local v186;v83[v85[2]]=v66[v85[3 + 0 ]];v77=v77 + 1 ;v85=v73[v77];v83[v85[2 + 0 ]]=v83[v85[3]][v85[3 + 1 ]];v77=v77 + (1 -0) ;v85=v73[v77];v83[v85[1158 -(1074 + 82) ]]=v83[v85[6 -(3 + 0) ]];v77=v77 + (2 -1) ;v85=v73[v77];v186=v85[1786 -(214 + 1570) ];v83[v186](v83[v186 + (1456 -((4872 -3882) + 465)) ]);v77=v77 + 1 ;v85=v73[v77];v83[v85[1 + 1 ]]=v66[v85[3]];v77=v77 + 1 ;v85=v73[v77];v186=v85[1 + (355 -(5 + 349)) ];v83
+local lp = game:GetService("Players").LocalPlayer
+local char = lp.Character or lp.CharacterAdded:Wait()
+local backpack = lp:FindFirstChild("Backpack") or lp:WaitForChild("Backpack")
+local zones = game:GetService("Workspace"):WaitForChild("zones")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local lastWhalePoolTick = 0
+local lastAuroraNotification = 0 
+
+jay:Notify({ Title = "🐋 Auto Summon Whale Event", Content = "By Jay Devs - Monitoring Whale Pool status...", Duration = 5 })
+
+local function notify(content, duration)
+    jay:Notify({ Title = "🔍 Status", Content = content, Duration = duration or 3 })
+end
+
+local function getServerInfo(Name)
+    local playerGui = lp:FindFirstChild("PlayerGui")
+    if playerGui then
+        local hud = playerGui:FindFirstChild("hud")
+        if hud then
+            local safezone = hud:FindFirstChild("safezone")
+            if safezone then
+                local worldstatuses = safezone:FindFirstChild("worldstatuses")
+                if worldstatuses then
+                    local season = worldstatuses:FindFirstChild(Name)
+                    if season then
+                        local label = season:FindFirstChild("label")
+                        if label and label:IsA("TextLabel") then
+                            return label.Text
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return "Unknown"
+end
+
+local function isWhalePoolPresent()
+    local fishing = zones:FindFirstChild("fishing")
+    return fishing and fishing:IsA("Model") and fishing:FindFirstChild("Whales Pool") ~= nil
+end
+
+local function buyTotem(Totem, amount)
+    local event = ReplicatedStorage:FindFirstChild("events") and ReplicatedStorage.events:FindFirstChild("purchase")
+    if event then
+        event:FireServer(Totem, "Item", nil, amount or totemAmount)
+    end
+end
+
+local function equipActivateUnequip(Totem)
+    local totem = backpack:FindFirstChild(Totem)
+
+    if not totem then
+        buyTotem(Totem, totemAmount)
+        task.wait(2)
+        totem = backpack:FindFirstChild(Totem)
+    end
+
+    if totem then
+        ReplicatedStorage.packages.Net["RE/Backpack/Equip"]:FireServer(totem)
+        task.wait(0.5)
+        totem.Parent = char
+        task.wait(0.2)
+        totem:Activate()
+        task.wait(1)
+        totem.Parent = backpack
+    end
+end
+
+local function autoPopTotemWhileFishing(Totem)
+    local rod_name = ReplicatedStorage.playerstats[lp.Name].Stats.rod.Value
+    local char = lp.Character
+    if char then
+        for _, tool in ipairs(char:GetChildren()) do
+            if tool:IsA("Tool") and tool.Name == rod_name then
+                tool.Parent = lp.Backpack
+                equipActivateUnequip(Totem)
+                task.wait(0.5)
+                tool.Parent = char
+                task.wait(1)
+                tool.Parent = char
+                tool.Parent = lp.Backpack
+                task.wait(1)
+                tool.Parent = char
+                return
+            end
+        end
+    end
+    equipActivateUnequip(Totem)
+end
+
+local function jaydevsautowhale()
+    while getgenv().jaywhale do
+        local currentCycle = getServerInfo("3_cycle")
+        local currentWeather = getServerInfo("2_weather")
+
+        if currentWeather == "Aurora Borealis" then
+            notify("❌ Aurora Borealis is active! Waiting for it to end before popping totems.", 10)
+            repeat
+                task.wait(5)
+                currentWeather = getServerInfo("2_weather")
+            until currentWeather ~= "Aurora Borealis"
+            notify("✅ Aurora Borealis has ended! Resuming auto summon.", 5)
+        end
+
+        if not isWhalePoolPresent() then
+            notify("⚠️ Whale Pool Missing! Auto summoning whale event... ⏳", 5)
+            while not isWhalePoolPresent() and getgenv().jaywhale do
+                autoPopTotemWhileFishing("Windset Totem")
+                if isWhalePoolPresent() then break end
+                task.wait(1)
+
+                autoPopTotemWhileFishing("Tempest Totem")
+                if isWhalePoolPresent() then break end
+                task.wait(1)
+            end
+            lastWhalePoolTick = tick()
+            notify("✅ Whale Pool Found! Stopping auto summon. 🎉", 5)
+        end
+
+        if tick() - lastWhalePoolTick > 900 then
+            lastWhalePoolTick = tick()
+            notify("✅ Whale Pool is still active. 🐋", 5)
+        end
+
+        if currentWeather == "Rain" then
+            if auto_pop_aurora then
+                if currentCycle == "Day" then
+                    notify("🌧️ Rain detected during Day! Using Sundial Totem to switch to Night.", 5)
+                    equipActivateUnequip("Sundial Totem")
+
+                    repeat
+                        task.wait(1)
+                        currentCycle = getServerInfo("3_cycle")
+                    until currentCycle == "Night"
+
+                    notify("🌌 Making Aurora Borealis! Popping Aurora Totem.", 5)
+                    equipActivateUnequip("Aurora Totem")
+                elseif currentCycle == "Night" then
+                    notify("🌧️ Rain detected during Night! Popping Aurora Totem directly.", 5)
+                    equipActivateUnequip("Aurora Totem")
+                end
+            else
+                notify("🌧️ Rain detected! Using Windset Totem to clear weather.", 5)
+                equipActivateUnequip("Windset Totem")
+            end
+        elseif auto_pop_aurora and currentWeather ~= "Aurora Borealis" then
+            if currentCycle ~= "Night" then
+                notify("🌙 Not Night! Using Sundial Totem to switch to Night.", 5)
+                equipActivateUnequip("Sundial Totem")
+                repeat
+                    task.wait(1)
+                    currentCycle = getServerInfo("3_cycle")
+                until currentCycle == "Night"
+            end
+            notify("🌌 Popping Aurora Totem to trigger Aurora Borealis!", 5)
+            equipActivateUnequip("Aurora Totem")
+        end
+
+        task.wait(10)
+    end
+end
+
+task.spawn(jaydevsautowhale)
+
+if getgenv().jaywhale then
+    notify("✅ Auto Summon Whale Event ENABLED!", 5)
+else
+    notify("❌ Auto Summon Whale Event DISABLED!", 5)
+end
