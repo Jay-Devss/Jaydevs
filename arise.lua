@@ -35,7 +35,7 @@ while task.wait(0.5) do
                         local rewardNameText = rewardName.Text
                         local nextRewardCountdown = nextRewardText.Text
                         if nextRewardCountdown == "NEXT RANDOM REWARD IN 5 MINUTES" then
-                            local embedTitle = "New Reward Given!"
+                            local embedTitle = "YOU GOT NEW REWARDS"
                             local embedColor = 16777215
                             
                             if rewardNameText == "ZIRU G" then
