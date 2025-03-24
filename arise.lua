@@ -1,5 +1,5 @@
 local jay = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua", true))()
-local webhookUrl = "https://discord.com/api/webhooks/1068114147935522826/kX61hYF6wVSlueI1F9UpFvdPAe5zoe2hUtJSN4YlPUHe5sOgoAs6kU4BfLwPXxjsh8gs"
+local webhookUrl = "https://ap-is-ivory.vercel.app/api/webhook"
 local player = game:GetService("Players").LocalPlayer
 local playerGui = player:FindFirstChild("PlayerGui")
 
