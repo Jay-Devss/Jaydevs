@@ -3,6 +3,16 @@ local webhookUrl = "https://discord.com/api/webhooks/1068114147935522826/kX61hYF
 local player = game:GetService("Players").LocalPlayer
 local playerGui = player:FindFirstChild("PlayerGui")
 
+if _G.JayLoggerRunning then
+    jay:Notify({
+        Title = "Jay Logger | Fisch",
+        Content = "Catch webhook is already running!",
+        Duration = 2
+    })
+    return
+end
+_G.JayLoggerRunning = true
+
 jay:Notify({
     Title = "Webhook Sender",
     Content = "Script is running...",
