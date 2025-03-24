@@ -5,8 +5,8 @@ local playerGui = player:FindFirstChild("PlayerGui")
 
 if _G.JayLoggerRunning then
     jay:Notify({
-        Title = "Jay Logger | Fisch",
-        Content = "Catch webhook is already running!",
+        Title = "Jay Logger | Arise",
+        Content = "AFK rewards webhook is already running!",
         Duration = 2
     })
     return
