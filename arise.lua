@@ -3,7 +3,7 @@ local webhookUrl = "https://discord.com/api/webhooks/1068114147935522826/kX61hYF
 local player = game:GetService("Players").LocalPlayer
 local playerGui = player:FindFirstChild("PlayerGui")
 
-if _G.JayLoggerRunning then
+if getgenv().JayLoggerRunning then
     jay:Notify({
         Title = "Jay Logger | Arise",
         Content = "AFK rewards webhook is already running!",
@@ -11,7 +11,7 @@ if _G.JayLoggerRunning then
     })
     return
 end
-_G.JayLoggerRunning = true
+getgenv().JayLoggerRunning = true
 
 jay:Notify({
     Title = "Webhook Sender",
