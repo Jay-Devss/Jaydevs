@@ -1,7 +1,23 @@
 local jay = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua", true))()
 
+local dataRemoteEvent = game:GetService("ReplicatedStorage"):WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent")
+
+local function buyDungeonTicket()
+    local args = {
+        {
+            {
+                Type = "Gems",
+                Event = "DungeonAction",
+                Action = "BuyTicket"
+            },
+            "\n"
+        }
+    }
+    dataRemoteEvent:FireServer(unpack(args))
+end
+
 local function bypassDungeon()
-    local dataRemoteEvent = game:GetService("ReplicatedStorage"):WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent")
+    buyDungeonTicket()
 
     local createDungeonArgs = {
         {
@@ -16,6 +32,8 @@ local function bypassDungeon()
     local dungeonID = dataRemoteEvent:FireServer(unpack(createDungeonArgs))
 
     task.wait(0.1)
+
+    buyDungeonTicket()
 
     local startDungeonArgs = {
         {
@@ -53,7 +71,7 @@ local function checkAndRunBypass()
         return false
     end
 
-    if isAllowedTime() then
+    if getgenv().spamDungeon or isAllowedTime() then
         bypassDungeon()
         return true
     else
