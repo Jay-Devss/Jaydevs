@@ -33,8 +33,6 @@ local function bypassDungeon()
 
     task.wait(0.1)
 
-    buyDungeonTicket()
-
     local startDungeonArgs = {
         {
             {
