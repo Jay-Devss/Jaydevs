@@ -25,7 +25,7 @@ if leaderstats then
                 embeds = {{
                     title = "📦 Inventory Update",
                     description = string.format(
-                        "🕒 *As of %s *\n\nYou have:\n- ✨ %d Common Value Dust\n- 🔮 %d Rare Value Dust\n- 🏆 %d Legendary Value Dust",
+                        "🕒 *As of %s *\n\nYou have:\n- ✨ %d Common Dust\n- 🔮 %d Rare Dust\n- 🏆 %d Legendary Dust",
                         formattedTime, commonAmount, rareAmount, legendaryAmount
                     ),
                     color = 16776960 -- Yellow color
