@@ -63,7 +63,7 @@ local function checkAndRunBypass()
     if string.find(gameName, "Dungeon") then
         jay:Notify({
             Title = "Dungeon Running",
-            Content = "You cannot run this function right now. Please finish the current dungeon first.",
+            Content = "You currently doing an dungeon raid, please finish the current dungeon first before bypassing the dungeon!",
             Duration = 5
         })
         return false
