@@ -92,7 +92,7 @@ local function FireAriseDestroy(npcName)
             },
             "\4"
         })
-        task.wait(0.05)
+        task.wait()
     end
 end
 
@@ -115,16 +115,16 @@ end)
 -- Main farming loop
 task.spawn(function()
     while getgenv().isActive do
-        -- Check if target still exists
-        if currentTarget then
-            if not LivingNPCs[currentTarget.name] or not currentTarget.npc:IsDescendantOf(workspace) then
+        -- If currentTarget died or removed
+        if currentTarget and (not LivingNPCs[currentTarget.name] or not currentTarget.npc:IsDescendantOf(workspace)) then
+            task.spawn(function()
                 FireAriseDestroy(currentTarget.name)
-                currentTarget = nil
-                FreezePlayer(false)
-            end
+            end)
+            currentTarget = nil
+            FreezePlayer(false)
         end
 
-        -- Pick next target if none
+        -- Pick next target instantly
         if not currentTarget then
             for name, data in pairs(LivingNPCs) do
                 currentTarget = data
@@ -136,7 +136,7 @@ task.spawn(function()
             FirePunch(currentTarget.name)
         end
 
-        task.wait(0.05)
+        task.wait(0.01)
     end
     FreezePlayer(false)
 end)
