@@ -1,17 +1,23 @@
-
---// SERVICES
-local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-local humanoid = character:WaitForChild("Humanoid")
 
---// STATE
+local TweenService = game:GetService("TweenService")
+local npcQueue = {}
 local currentTarget = nil
 local tween = nil
+local punching = false
+local frozen = false
+local nextUpdateTime = 0
 
---// HELPERS
+local function FreezePlayer(state)
+    if character and character:FindFirstChild("Humanoid") then
+        character.Humanoid.AutoRotate = not state
+        character.Humanoid.WalkSpeed = state and 0 or 16
+        frozen = state
+    end
+end
+
 local function IsNPCLiving(npc)
     if not npc then return false end
     local healthBar = npc:FindFirstChild("HealthBar")
@@ -23,110 +29,124 @@ local function IsNPCLiving(npc)
 end
 
 local function GetAllLivingNPCs()
-    local clientFolder = workspace:FindFirstChild("__Main")
-        :FindFirstChild("__Enemies")
-        :FindFirstChild("Client")
+    local mainFolder = workspace:FindFirstChild("__Main")
+    if not mainFolder then return {} end
+    local enemiesFolder = mainFolder:FindFirstChild("__Enemies")
+    if not enemiesFolder then return {} end
+    local clientFolder = enemiesFolder:FindFirstChild("Client")
     if not clientFolder then return {} end
 
     local npcs = {}
-    for _, npc in pairs(clientFolder:GetChildren()) do
-        if npc:FindFirstChild("HumanoidRootPart") and IsNPCLiving(npc) then
-            local dist = (npc.HumanoidRootPart.Position - humanoidRootPart.Position).Magnitude
-            if dist <= getgenv().maxDetectionDistance then
-                table.insert(npcs, {npc = npc, dist = dist})
+    for _, enemy in pairs(clientFolder:GetChildren()) do
+        if enemy:FindFirstChild("HumanoidRootPart") and IsNPCLiving(enemy) then
+            local distance = (enemy.HumanoidRootPart.Position - humanoidRootPart.Position).Magnitude
+            if distance <= getgenv().maxDetectionDistance then
+                table.insert(npcs, {enemy = enemy, distance = distance})
             end
         end
     end
 
-    table.sort(npcs, function(a, b) return a.dist < b.dist end)
+    table.sort(npcs, function(a, b) return a.distance < b.distance end)
 
     local sorted = {}
-    for _, entry in ipairs(npcs) do
-        table.insert(sorted, entry.npc)
+    for _, data in ipairs(npcs) do
+        table.insert(sorted, data.enemy)
     end
     return sorted
 end
 
 local function GetNearbyPosition(npc)
     local hitboxRadius = 5
-    local npcHumanoid = npc:FindFirstChildOfClass("Humanoid")
-    if npcHumanoid then
-        hitboxRadius = npcHumanoid.HipHeight + 3
+    local humanoid = npc:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        hitboxRadius = humanoid.HipHeight + 3
     end
     local npcPos = npc.HumanoidRootPart.Position
-    local dir = (humanoidRootPart.Position - npcPos).Unit
-    local offset = hitboxRadius + math.random(1, 3)
-    return npcPos + (dir * offset)
+    local direction = (humanoidRootPart.Position - npcPos).unit
+    local offsetDistance = hitboxRadius + math.random(1, 3)
+    return npcPos + (direction * offsetDistance)
 end
 
 local function MoveToNPC(npc)
-    local targetPos = GetNearbyPosition(npc)
+    local targetPosition = GetNearbyPosition(npc)
     if getgenv().useTween then
         if tween then tween:Cancel() end
-        local duration = (humanoidRootPart.Position - targetPos).Magnitude / getgenv().tweenSpeed
-        tween = TweenService:Create(humanoidRootPart, TweenInfo.new(duration, Enum.EasingStyle.Linear), {CFrame = CFrame.new(targetPos)})
+        local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPosition).Magnitude / getgenv().tweenSpeed, Enum.EasingStyle.Linear)
+        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
         tween:Play()
     else
-        humanoidRootPart.CFrame = CFrame.new(targetPos)
-    end
-end
-
-local function FreezePlayer(state)
-    if humanoid then
-        humanoid.WalkSpeed = state and 0 or 16
-        humanoid.JumpPower = state and 0 or 50
+        humanoidRootPart.CFrame = CFrame.new(targetPosition)
     end
 end
 
 local function FirePunch(npc)
-    ReplicatedStorage:WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent"):FireServer({
-        {
-            Event = "PunchAttack",
-            Enemy = npc.Name
-        },
-        "\4"
-    })
-end
-
-local function FireAriseDestroy(npc)
-    local eventName = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture"
-    for _ = 1, 3 do
-        ReplicatedStorage:WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent"):FireServer({
+    if not punching and npc and IsNPCLiving(npc) then
+        punching = true
+        game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
             {
-                Event = eventName,
+                Event = "PunchAttack",
                 Enemy = npc.Name
             },
             "\4"
         })
-        task.wait(0.15)
+        task.delay(0.1, function() punching = false end)
     end
 end
 
---// CHARACTER RESET
-player.CharacterAdded:Connect(function(char)
-    character = char
-    humanoidRootPart = char:WaitForChild("HumanoidRootPart")
-    humanoid = char:WaitForChild("Humanoid")
-end)
+local function FireAriseDestroy(npc)
+    if not getgenv().autoAriseDestroy then return end
+    task.wait(0.1)
+    for _ = 1, 3 do
+        game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+            {
+                Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
+                Enemy = npc.Name
+            },
+            "\4"
+        })
+        task.wait(0.05)
+    end
+end
 
---// MAIN LOOP
+local function ResetCharacter()
+    character = player.Character or player.CharacterAdded:Wait()
+    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+end
+
+player.CharacterAdded:Connect(ResetCharacter)
+
 task.spawn(function()
     while getgenv().isActive do
-        if not currentTarget or not IsNPCLiving(currentTarget) then
-            if currentTarget and getgenv().autoAriseDestroy then
-                FireAriseDestroy(currentTarget)
-            end
+        local now = tick()
 
-            local npcs = GetAllLivingNPCs()
-            currentTarget = npcs[1]
+        if now >= nextUpdateTime then
+            npcQueue = GetAllLivingNPCs()
+            nextUpdateTime = now + 5
+        end
+
+        if not currentTarget or not IsNPCLiving(currentTarget) then
             if currentTarget then
-                MoveToNPC(currentTarget)
+                FireAriseDestroy(currentTarget)
+                task.wait(0.1)
+                FreezePlayer(false)
+            end
+            currentTarget = nil
+            for _, npc in ipairs(npcQueue) do
+                if IsNPCLiving(npc) then
+                    currentTarget = npc
+                    MoveToNPC(currentTarget)
+                    break
+                end
             end
         else
             FreezePlayer(true)
             FirePunch(currentTarget)
+            if not IsNPCLiving(currentTarget) then
+                task.wait(0.1)
+                currentTarget = nil
+            end
         end
-        task.wait()
+        task.wait(0.1)
     end
     FreezePlayer(false)
 end)
