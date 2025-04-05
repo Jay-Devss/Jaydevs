@@ -6,7 +6,6 @@ local TweenService = game:GetService("TweenService")
 local npcTable = {}
 local currentTarget = nil
 local tween = nil
-local punching = false
 local frozen = false
 
 local function FreezePlayer(state)
@@ -141,7 +140,7 @@ task.spawn(function()
             FreezePlayer(true)
             FirePunch(currentTarget)
         end
-        task.wait(0)
+        task.wait() -- no delay
     end
     FreezePlayer(false)
 end)
