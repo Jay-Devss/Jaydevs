@@ -23,8 +23,8 @@ local function IsNPCLiving(npc)
 end
 
 local function GetAllLivingNPCs()
-    local clientFolder = workspace:FindFirstChild("__Main")?
-        :FindFirstChild("__Enemies")?
+    local clientFolder = workspace:FindFirstChild("__Main")
+        :FindFirstChild("__Enemies")
         :FindFirstChild("Client")
     if not clientFolder then return {} end
 
