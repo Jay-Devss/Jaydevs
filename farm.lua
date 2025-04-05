@@ -66,7 +66,7 @@ task.spawn(function()
 end)
 
 local function GetNearbyPosition(npc)
-    local hitboxRadius = 5
+    local hitboxRadius = 3
     local humanoid = npc:FindFirstChildOfClass("Humanoid")
     if humanoid then
         hitboxRadius = humanoid.HipHeight + 3
