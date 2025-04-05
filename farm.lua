@@ -93,7 +93,6 @@ local function FirePunch(npc)
             },
             "\4"
         })
-        task.delay(0.05, function() punching = false end)
     end
 end
 
@@ -143,7 +142,7 @@ task.spawn(function()
             FreezePlayer(true)
             FirePunch(currentTarget)
         end
-        task.wait(0.05)
+        task.wait(0)
     end
     FreezePlayer(false)
 end)
