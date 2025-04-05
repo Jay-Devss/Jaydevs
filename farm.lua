@@ -6,7 +6,6 @@ local TweenService = game:GetService("TweenService")
 local npcQueue = {}
 local currentTarget = nil
 local tween = nil
-local punching = false
 local frozen = false
 local nextUpdateTime = 0
 
@@ -55,23 +54,11 @@ local function GetAllLivingNPCs()
     return sorted
 end
 
-local function GetNearbyPosition(npc)
-    local hitboxRadius = 5
-    local humanoid = npc:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        hitboxRadius = humanoid.HipHeight + 3
-    end
-    local npcPos = npc.HumanoidRootPart.Position
-    local direction = (humanoidRootPart.Position - npcPos).unit
-    local offsetDistance = hitboxRadius + math.random(1, 3)
-    return npcPos + (direction * offsetDistance)
-end
-
 local function MoveToNPC(npc)
-    local targetPosition = GetNearbyPosition(npc)
+    local targetPosition = npc.HumanoidRootPart.Position
     if getgenv().useTween then
         if tween then tween:Cancel() end
-        local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPosition).Magnitude / getgenv().tweenSpeed, Enum.EasingStyle.Linear)
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear)
         tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
         tween:Play()
     else
@@ -80,8 +67,7 @@ local function MoveToNPC(npc)
 end
 
 local function FirePunch(npc)
-    if not punching and npc and IsNPCLiving(npc) then
-        punching = true
+    if npc and IsNPCLiving(npc) then
         game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
             {
                 Event = "PunchAttack",
@@ -89,7 +75,6 @@ local function FirePunch(npc)
             },
             "\4"
         })
-        task.delay(0.1, function() punching = false end)
     end
 end
 
@@ -119,11 +104,13 @@ task.spawn(function()
     while getgenv().isActive do
         local now = tick()
 
+        -- Update NPC queue every second
         if now >= nextUpdateTime then
             npcQueue = GetAllLivingNPCs()
-            nextUpdateTime = now + 5
+            nextUpdateTime = now + 1
         end
 
+        -- If no current target or target is dead, find a new NPC
         if not currentTarget or not IsNPCLiving(currentTarget) then
             if currentTarget then
                 FireAriseDestroy(currentTarget)
@@ -139,14 +126,18 @@ task.spawn(function()
                 end
             end
         else
+            -- Attack current target continuously without delay
             FreezePlayer(true)
             FirePunch(currentTarget)
+
+            -- If NPC dies, remove it
             if not IsNPCLiving(currentTarget) then
                 task.wait(0.1)
                 currentTarget = nil
             end
         end
-        task.wait(0.1)
+
+        task.wait() -- Runs as fast as possible
     end
     FreezePlayer(false)
 end)
