@@ -7,7 +7,7 @@ local npcQueue = {}
 local currentTarget = nil
 local tween = nil
 local frozen = false
-local nextUpdateTime = 0
+local nextUpdateTime = 3
 
 local function FreezePlayer(state)
     if character and character:FindFirstChild("Humanoid") then
@@ -54,11 +54,23 @@ local function GetAllLivingNPCs()
     return sorted
 end
 
+local function GetNearbyPosition(npc)
+    local hitboxRadius = 5
+    local humanoid = npc:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        hitboxRadius = humanoid.HipHeight + 3
+    end
+    local npcPos = npc.HumanoidRootPart.Position
+    local direction = (humanoidRootPart.Position - npcPos).Unit
+    local offsetDistance = hitboxRadius + math.random(1, 2)
+    return npcPos + (direction * offsetDistance)
+end
+
 local function MoveToNPC(npc)
-    local targetPosition = npc.HumanoidRootPart.Position
+    local targetPosition = GetNearbyPosition(npc)
     if getgenv().useTween then
         if tween then tween:Cancel() end
-        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear)
+        local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPosition).Magnitude / getgenv().tweenSpeed, Enum.EasingStyle.Linear)
         tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
         tween:Play()
     else
@@ -104,17 +116,15 @@ task.spawn(function()
     while getgenv().isActive do
         local now = tick()
 
-        -- Update NPC queue every second
         if now >= nextUpdateTime then
             npcQueue = GetAllLivingNPCs()
             nextUpdateTime = now + 1
         end
 
-        -- If no current target or target is dead, find a new NPC
         if not currentTarget or not IsNPCLiving(currentTarget) then
             if currentTarget then
                 FireAriseDestroy(currentTarget)
-                task.wait(0.1)
+                task.wait(0.05)
                 FreezePlayer(false)
             end
             currentTarget = nil
@@ -126,18 +136,11 @@ task.spawn(function()
                 end
             end
         else
-            -- Attack current target continuously without delay
             FreezePlayer(true)
             FirePunch(currentTarget)
-
-            -- If NPC dies, remove it
-            if not IsNPCLiving(currentTarget) then
-                task.wait(0.1)
-                currentTarget = nil
-            end
         end
 
-        task.wait() -- Runs as fast as possible
+        task.wait()
     end
     FreezePlayer(false)
 end)
