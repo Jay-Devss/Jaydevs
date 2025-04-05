@@ -27,10 +27,10 @@ local function IsNPCLiving(npc)
 end
 
 local function UpdateNPCStatus()
-    for _, npcData in pairs(npcTable) do
+    for name, npcData in pairs(npcTable) do
         if npcData.Instance and npcData.Alive then
             if not IsNPCLiving(npcData.Instance) then
-                npcData.Alive = false
+                npcTable[name] = nil
             end
         end
     end
@@ -57,6 +57,13 @@ local function AddNewNPCs()
         end
     end
 end
+
+task.spawn(function()
+    while getgenv().isActive do
+        AddNewNPCs()
+        task.wait(0.5)
+    end
+end)
 
 local function GetNearbyPosition(npc)
     local hitboxRadius = 5
@@ -118,7 +125,6 @@ player.CharacterAdded:Connect(ResetCharacter)
 
 task.spawn(function()
     while getgenv().isActive do
-        AddNewNPCs()
         UpdateNPCStatus()
 
         if not currentTarget or not IsNPCLiving(currentTarget) then
@@ -140,7 +146,7 @@ task.spawn(function()
             FreezePlayer(true)
             FirePunch(currentTarget)
         end
-        task.wait() -- no delay
+        task.wait(0)
     end
     FreezePlayer(false)
 end)
