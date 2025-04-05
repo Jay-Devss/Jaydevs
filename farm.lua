@@ -38,7 +38,7 @@ local function GetAllLivingNPCs()
 
     local npcs = {}
     for _, npc in pairs(serverFolder:GetChildren()) do
-        if npc:IsA("BasePart") and npc:GetAttribute("CFrame") and IsNPCLiving(npc) then
+        if npc:IsA("Part") and npc:GetAttribute("CFrame") and IsNPCLiving(npc) then
             local npcCFrame = npc:GetAttribute("CFrame")
             local distance = (CFrame.new(npcCFrame).Position - humanoidRootPart.Position).Magnitude
             if distance <= getgenv().maxDetectionDistance then
