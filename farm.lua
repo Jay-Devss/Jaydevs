@@ -84,8 +84,7 @@ local function MoveToNPC(npc)
 end
 
 local function FirePunch(npc)
-    if not punching and npc and IsNPCLiving(npc) then
-        punching = true
+    if npc and IsNPCLiving(npc) then
         game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
             {
                 Event = "PunchAttack",
