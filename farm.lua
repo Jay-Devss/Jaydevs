@@ -3,10 +3,12 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 local TweenService = game:GetService("TweenService")
-local npcTable = {}
+local npcQueue = {}
 local currentTarget = nil
 local tween = nil
+local punching = false
 local frozen = false
+local nextUpdateTime = 0
 
 local function FreezePlayer(state)
     if character and character:FindFirstChild("Humanoid") then
@@ -26,55 +28,45 @@ local function IsNPCLiving(npc)
     return amount and amount:IsA("TextLabel") and amount.Text ~= "0 HP"
 end
 
-local function UpdateNPCStatus()
-    for name, npcData in pairs(npcTable) do
-        if npcData.Instance and npcData.Alive then
-            if not IsNPCLiving(npcData.Instance) then
-                npcTable[name] = nil
-            end
-        end
-    end
-end
-
-local function AddNewNPCs()
+local function GetAllLivingNPCs()
     local mainFolder = workspace:FindFirstChild("__Main")
-    if not mainFolder then return end
+    if not mainFolder then return {} end
     local enemiesFolder = mainFolder:FindFirstChild("__Enemies")
-    if not enemiesFolder then return end
-    local clientFolder = enemiesFolder:FindFirstChild("Client")
-    if not clientFolder then return end
+    if not enemiesFolder then return {} end
+    local serverFolder = enemiesFolder:FindFirstChild("Server")
+    if not serverFolder then return {} end
 
-    for _, enemy in pairs(clientFolder:GetChildren()) do
-        if enemy:FindFirstChild("HumanoidRootPart") and not npcTable[enemy.Name] then
-            local distance = (enemy.HumanoidRootPart.Position - humanoidRootPart.Position).Magnitude
+    local npcs = {}
+    for _, npc in pairs(serverFolder:GetChildren()) do
+        if npc:IsA("BasePart") and npc:GetAttribute("CFrame") and IsNPCLiving(npc) then
+            local npcCFrame = npc:GetAttribute("CFrame")
+            local distance = (CFrame.new(npcCFrame).Position - humanoidRootPart.Position).Magnitude
             if distance <= getgenv().maxDetectionDistance then
-                npcTable[enemy.Name] = {
-                    Instance = enemy,
-                    CFrame = enemy.HumanoidRootPart.CFrame,
-                    Alive = IsNPCLiving(enemy)
-                }
+                table.insert(npcs, {enemy = npc, distance = distance})
             end
         end
     end
-end
 
-task.spawn(function()
-    while getgenv().isActive do
-        AddNewNPCs()
-        task.wait(0.1)
+    table.sort(npcs, function(a, b) return a.distance < b.distance end)
+
+    local sorted = {}
+    for _, data in ipairs(npcs) do
+        table.insert(sorted, data.enemy)
     end
-end)
+    return sorted
+end
 
 local function GetNearbyPosition(npc)
     local hitboxRadius = 3
-    local humanoid = npc:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        hitboxRadius = humanoid.HipHeight + 3
+    local npcHumanoid = npc:FindFirstChildOfClass("Humanoid")
+    if npcHumanoid then
+        hitboxRadius = npcHumanoid.HipHeight + 3
     end
-    local npcPos = npc.HumanoidRootPart.Position
-    local direction = (humanoidRootPart.Position - npcPos).unit
-    local offsetDistance = hitboxRadius + math.random(1, 3)
-    return npcPos + (direction * offsetDistance)
+    local npcCFrame = npc:GetAttribute("CFrame")
+    local npcPos = CFrame.new(npcCFrame).Position
+    local dir = (humanoidRootPart.Position - npcPos).Unit
+    local offset = hitboxRadius + math.random(1, 3)
+    return npcPos + (dir * offset)
 end
 
 local function MoveToNPC(npc)
@@ -103,7 +95,7 @@ end
 
 local function FireAriseDestroy(npc)
     if not getgenv().autoAriseDestroy then return end
-    task.wait(0.05)
+    task.wait(0.1)
     for _ = 1, 3 do
         game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
             {
@@ -112,7 +104,7 @@ local function FireAriseDestroy(npc)
             },
             "\4"
         })
-        task.wait(0.05)
+        task.wait(0)
     end
 end
 
@@ -125,19 +117,22 @@ player.CharacterAdded:Connect(ResetCharacter)
 
 task.spawn(function()
     while getgenv().isActive do
-        UpdateNPCStatus()
+        local now = tick()
+
+        if now >= nextUpdateTime then
+            npcQueue = GetAllLivingNPCs()
+            nextUpdateTime = now + 0.5
+        end
 
         if not currentTarget or not IsNPCLiving(currentTarget) then
             if currentTarget then
                 FireAriseDestroy(currentTarget)
-                task.wait(0.1)
                 FreezePlayer(false)
             end
             currentTarget = nil
-
-            for _, npcData in pairs(npcTable) do
-                if npcData.Alive and npcData.Instance then
-                    currentTarget = npcData.Instance
+            for _, npc in ipairs(npcQueue) do
+                if IsNPCLiving(npc) then
+                    currentTarget = npc
                     MoveToNPC(currentTarget)
                     break
                 end
@@ -145,8 +140,11 @@ task.spawn(function()
         else
             FreezePlayer(true)
             FirePunch(currentTarget)
+            if not IsNPCLiving(currentTarget) then
+                FreezePlayer(false)
+                currentTarget = nil
+            end
         end
-        task.wait(0)
+        task.wait(0.1)
     end
-    FreezePlayer(false)
 end)
