@@ -61,7 +61,7 @@ end
 task.spawn(function()
     while getgenv().isActive do
         AddNewNPCs()
-        task.wait(0.5)
+        task.wait(0.1)
     end
 end)
 
