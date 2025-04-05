@@ -3,13 +3,13 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 local TweenService = game:GetService("TweenService")
-local npcQueue = {}
+local LivingNPCs = {} -- Format: [npc.Name] = {npc = Instance, cframe = CFrame}
 local currentTarget = nil
 local tween = nil
 local punching = false
 local frozen = false
-local nextUpdateTime = 0
 
+-- Freeze or unfreeze user movement
 local function FreezePlayer(state)
     if character and character:FindFirstChild("Humanoid") then
         character.Humanoid.AutoRotate = not state
@@ -18,96 +18,85 @@ local function FreezePlayer(state)
     end
 end
 
-local function IsNPCLiving(npc)
-    if not npc then return false end
-    local healthBar = npc:FindFirstChild("HealthBar")
-    if not healthBar then return false end
-    local main = healthBar:FindFirstChild("Main")
-    local bar = main and main:FindFirstChild("Bar")
-    local amount = bar and bar:FindFirstChild("Amount")
-    return amount and amount:IsA("TextLabel") and amount.Text ~= "0 HP"
-end
-
+-- Update and return list of alive NPCs
 local function GetAllLivingNPCs()
-    local mainFolder = workspace:FindFirstChild("__Main")
-    if not mainFolder then return {} end
-    local enemiesFolder = mainFolder:FindFirstChild("__Enemies")
-    if not enemiesFolder then return {} end
-    local serverFolder = enemiesFolder:FindFirstChild("Server")
+    local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
     if not serverFolder then return {} end
 
-    local npcs = {}
+    local activeNames = {}
     for _, npc in pairs(serverFolder:GetChildren()) do
-        if npc:IsA("Part") and npc:GetAttribute("CFrame") and IsNPCLiving(npc) then
-            local npcCFrame = npc:GetAttribute("CFrame")
-            local distance = (CFrame.new(npcCFrame).Position - humanoidRootPart.Position).Magnitude
-            if distance <= getgenv().maxDetectionDistance then
-                table.insert(npcs, {enemy = npc, distance = distance})
+        if npc:IsA("BasePart") then
+            local name = npc.Name
+            activeNames[name] = true
+            if not LivingNPCs[name] then
+                LivingNPCs[name] = {
+                    name = name,
+                    npc = npc,
+                    cframe = npc.CFrame
+                }
+            else
+                LivingNPCs[name].npc = npc
+                LivingNPCs[name].cframe = npc.CFrame
             end
         end
     end
 
-    table.sort(npcs, function(a, b) return a.distance < b.distance end)
-
-    local sorted = {}
-    for _, data in ipairs(npcs) do
-        table.insert(sorted, data.enemy)
+    -- Remove dead NPCs (not found anymore)
+    for name in pairs(LivingNPCs) do
+        if not activeNames[name] then
+            LivingNPCs[name] = nil
+        end
     end
-    return sorted
+
+    return LivingNPCs
 end
 
-local function GetNearbyPosition(npc)
-    local hitboxRadius = 3
-    local npcHumanoid = npc:FindFirstChildOfClass("Humanoid")
-    if npcHumanoid then
-        hitboxRadius = npcHumanoid.HipHeight + 3
-    end
-    local npcCFrame = npc:GetAttribute("CFrame")
-    local npcPos = CFrame.new(npcCFrame).Position
-    local dir = (humanoidRootPart.Position - npcPos).Unit
-    local offset = hitboxRadius + math.random(1, 3)
-    return npcPos + (dir * offset)
-end
-
-local function MoveToNPC(npc)
-    local targetPosition = GetNearbyPosition(npc)
+-- Tween or teleport to CFrame
+local function MoveToCFrame(cframe)
     if getgenv().useTween then
         if tween then tween:Cancel() end
-        local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPosition).Magnitude / getgenv().tweenSpeed, Enum.EasingStyle.Linear)
-        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+        local distance = (humanoidRootPart.Position - cframe.Position).Magnitude
+        local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
+        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = cframe})
         tween:Play()
     else
-        humanoidRootPart.CFrame = CFrame.new(targetPosition)
+        humanoidRootPart.CFrame = cframe
     end
 end
 
-local function FirePunch(npc)
-    if npc and IsNPCLiving(npc) then
+-- Call PunchAttack event
+local function FirePunch(npcName)
+    if not punching then
+        punching = true
         game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
             {
                 Event = "PunchAttack",
-                Enemy = npc.Name
+                Enemy = npcName
             },
             "\4"
         })
+        punching = false
     end
 end
 
-local function FireAriseDestroy(npc)
+-- AriseDestroy after NPC disappears
+local function FireAriseDestroy(npcName)
     if not getgenv().autoAriseDestroy then return end
     task.wait(0.1)
     for _ = 1, 3 do
         game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
             {
                 Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
-                Enemy = npc.Name
+                Enemy = npcName
             },
             "\4"
         })
-        task.wait(0)
+        task.wait(0.05)
     end
 end
 
+-- Handle reset
 local function ResetCharacter()
     character = player.Character or player.CharacterAdded:Wait()
     humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -115,36 +104,39 @@ end
 
 player.CharacterAdded:Connect(ResetCharacter)
 
+-- Background loop to always update LivingNPCs
 task.spawn(function()
     while getgenv().isActive do
-        local now = tick()
+        GetAllLivingNPCs()
+        task.wait(0) -- Fastest possible update
+    end
+end)
 
-        if now >= nextUpdateTime then
-            npcQueue = GetAllLivingNPCs()
-            nextUpdateTime = now + 0.5
-        end
-
-        if not currentTarget or not IsNPCLiving(currentTarget) then
-            if currentTarget then
-                FireAriseDestroy(currentTarget)
+-- Main farming loop
+task.spawn(function()
+    while getgenv().isActive do
+        -- Check if target still exists
+        if currentTarget then
+            if not LivingNPCs[currentTarget.name] or not currentTarget.npc:IsDescendantOf(workspace) then
+                FireAriseDestroy(currentTarget.name)
+                currentTarget = nil
                 FreezePlayer(false)
             end
-            currentTarget = nil
-            for _, npc in ipairs(npcQueue) do
-                if IsNPCLiving(npc) then
-                    currentTarget = npc
-                    MoveToNPC(currentTarget)
-                    break
-                end
+        end
+
+        -- Pick next target if none
+        if not currentTarget then
+            for name, data in pairs(LivingNPCs) do
+                currentTarget = data
+                MoveToCFrame(data.cframe)
+                break
             end
         else
             FreezePlayer(true)
-            FirePunch(currentTarget)
-            if not IsNPCLiving(currentTarget) then
-                FreezePlayer(false)
-                currentTarget = nil
-            end
+            FirePunch(currentTarget.name)
         end
-        task.wait(0.1)
+
+        task.wait(0.05)
     end
+    FreezePlayer(false)
 end)
