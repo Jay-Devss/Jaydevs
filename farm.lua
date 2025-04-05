@@ -8,7 +8,7 @@ local currentTarget = nil
 local isFrozen = false
 
 local TweenService = game:GetService("TweenService")
-local raycastParams = RaycastParams.new()
+local raycastParams = Instance.new("RaycastParams")
 raycastParams.FilterDescendantsInstances = {character}
 raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
