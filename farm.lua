@@ -117,25 +117,23 @@ task.spawn(function()
     while getgenv().isActive do
         if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
             if currentTarget and IsNPCDead(currentTarget) then
-                local oldTarget = currentTarget
+                local lastTarget = currentTarget
+                currentTarget = nil -- Clear it first to avoid race conditions
                 task.spawn(function()
-                    FireAriseDestroy(oldTarget.Name)
+                    FireAriseDestroy(lastTarget.Name)
                 end)
+            else
+                currentTarget = nil
             end
-
-            currentTarget = nil
 
             for name, npc in pairs(LivingNPCs) do
                 if npc and npc:IsDescendantOf(workspace) and not IsNPCDead(npc) then
                     currentTarget = npc
-                    tweenInProgress = true
-                    MoveToCFrame(npc, function()
-                        tweenInProgress = false
-                    end)
+                    MoveToCFrame(npc)
                     break
                 end
             end
-        elseif currentTarget and not tweenInProgress then
+        elseif currentTarget then
             FreezePlayer(true)
             FirePunch(currentTarget.Name)
         end
