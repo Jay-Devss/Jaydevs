@@ -51,8 +51,10 @@ local function MoveToCFrame(npc)
         tween:Play()
     else
         humanoidRootPart.CFrame = targetCFrame
+        task.wait(0.1) -- Prevents rapid-fire teleports
     end
 end
+
 
 local function FirePunch(npcName)
     if not punching then
@@ -70,16 +72,18 @@ end
 
 function FireAriseDestroy(npcName)
     if not getgenv().autoAriseDestroy then return end
-    for _ = 1, 3 do
-        game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
-            {
-                Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
-                Enemy = npcName
-            },
-            "\4"
-        })
-        task.wait()
-    end
+    task.spawn(function()
+        for _ = 1, 3 do
+            game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+                {
+                    Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
+                    Enemy = npcName
+                },
+                "\4"
+            })
+            task.wait(0.1) -- Ensures proper delay between each fire
+        end
+    end)
 end
 
 local function IsNPCDead(npc)
