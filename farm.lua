@@ -30,17 +30,26 @@ local function GetAllLivingNPCs()
     end
 end
 
+local function GetNearbyPosition(npc)
+    local npcPos = npc.CFrame.Position
+    local direction = (npcPos - humanoidRootPart.Position).Unit
+    local offsetDistance = math.random(3, 5)
+    return npcPos - (direction * offsetDistance)
+end
+
 local function MoveToCFrame(npc)
-    local cframe = npc.CFrame
+    local targetPosition = GetNearbyPosition(npc)
+    local targetCFrame = CFrame.new(targetPosition)
+
     if getgenv().useTween then
         if tween then tween:Cancel() end
-        local distance = (humanoidRootPart.Position - cframe.Position).Magnitude
+        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
         local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
         local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = cframe})
+        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
         tween:Play()
     else
-        humanoidRootPart.CFrame = cframe
+        humanoidRootPart.CFrame = targetCFrame
     end
 end
 
