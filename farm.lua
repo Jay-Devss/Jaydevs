@@ -8,13 +8,6 @@ local currentTarget = nil
 local tween = nil
 local lastDeadNPC = nil
 
-getgenv().isAutoLeftActive = true
-getgenv().isActive = true
-getgenv().useTween = true
-getgenv().tweenSpeed = 100
-getgenv().autoAriseDestroy = true
-getgenv().ariseDestroyType = "Destroy"
-
 local function FreezePlayer(state)
 	if character and character:FindFirstChild("Humanoid") then
 		character.Humanoid.AutoRotate = not state
@@ -46,9 +39,12 @@ end
 local function MoveToCFrame(npc)
 	local targetPosition = GetNearbyPosition(npc)
 	local targetCFrame = CFrame.new(targetPosition)
+
 	if getgenv().useTween then
 		if tween then tween:Cancel() end
-		local tweenInfo = TweenInfo.new(0, Enum.EasingStyle.Linear)
+		local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+		local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1) -- controlled by user
+		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
 		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 		tween:Play()
 	else
@@ -105,6 +101,11 @@ task.spawn(function()
 			for name, npc in pairs(LivingNPCs) do
 				if npc and not IsNPCDead(npc) then
 					currentTarget = npc
+					
+					-- 1. Immediately punch
+					FirePunch(name)
+					
+					-- 2. Then move toward it
 					MoveToCFrame(npc)
 					break
 				end
