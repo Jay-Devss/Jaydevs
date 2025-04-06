@@ -108,10 +108,14 @@ task.spawn(function()
     while getgenv().isActive do
         if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
             if currentTarget and IsNPCDead(currentTarget) then
-                FireAriseDestroy(currentTarget.Name)
+                local lastTarget = currentTarget
+                currentTarget = nil -- Clear it first to avoid race conditions
+                task.spawn(function()
+                    FireAriseDestroy(lastTarget.Name)
+                end)
+            else
+                currentTarget = nil
             end
-
-            currentTarget = nil
 
             for name, npc in pairs(LivingNPCs) do
                 if npc and npc:IsDescendantOf(workspace) and not IsNPCDead(npc) then
@@ -128,6 +132,7 @@ task.spawn(function()
     end
     FreezePlayer(false)
 end)
+
 function AutoLeft()
     task.spawn(function()
         while getgenv().isAutoLeftActive do
