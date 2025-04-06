@@ -7,6 +7,7 @@ local LivingNPCs = {}
 local currentTarget = nil
 local tween = nil
 local punching = false
+getgenv().isAutoLeftActive = true
 
 local function FreezePlayer(state)
     if character and character:FindFirstChild("Humanoid") then
@@ -17,26 +18,20 @@ end
 
 local function GetAllLivingNPCs()
     local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
-    if not serverFolder then return {} end
+    if not serverFolder then return end
 
     for _, npc in pairs(serverFolder:GetChildren()) do
         if npc:IsA("BasePart") then
             local name = npc.Name
             if not LivingNPCs[name] then
-                LivingNPCs[name] = {
-                    name = name,
-                    npc = npc,
-                    cframe = npc.CFrame
-                }
-            else
-                LivingNPCs[name].npc = npc
-                LivingNPCs[name].cframe = npc.CFrame
+                LivingNPCs[name] = npc
             end
         end
     end
 end
 
-local function MoveToCFrame(cframe)
+local function MoveToCFrame(npc)
+    local cframe = npc.CFrame
     if getgenv().useTween then
         if tween then tween:Cancel() end
         local distance = (humanoidRootPart.Position - cframe.Position).Magnitude
@@ -92,35 +87,32 @@ end)
 task.spawn(function()
     while getgenv().isActive do
         GetAllLivingNPCs()
-        task.wait(0.1)
+        task.wait(0.5)
     end
 end)
 
 task.spawn(function()
     while getgenv().isActive do
-        if not currentTarget or not currentTarget.npc or not currentTarget.npc:IsDescendantOf(workspace) or IsNPCDead(currentTarget.npc) then
-            if currentTarget and IsNPCDead(currentTarget.npc) then
-                FireAriseDestroy(currentTarget.name)
+        if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
+            if currentTarget and IsNPCDead(currentTarget) then
+                FireAriseDestroy(currentTarget.Name)
             end
             currentTarget = nil
-            for name, data in pairs(LivingNPCs) do
-                if data.npc and not IsNPCDead(data.npc) then
-                    currentTarget = data
-                    MoveToCFrame(data.cframe)
+            for name, npc in pairs(LivingNPCs) do
+                if npc and not IsNPCDead(npc) then
+                    currentTarget = npc
+                    MoveToCFrame(npc)
                     break
                 end
             end
-        elseif currentTarget and currentTarget.npc then
+        elseif currentTarget then
             FreezePlayer(true)
-            FirePunch(currentTarget.name)
+            FirePunch(currentTarget.Name)
         end
-        task.wait(0)
+        task.wait(0.1)
     end
     FreezePlayer(false)
 end)
-
-
-getgenv().isAutoLeftActive = true
 
 function AutoLeft()
     task.spawn(function()
