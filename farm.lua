@@ -31,10 +31,11 @@ local function GetAllLivingNPCs()
 end
 
 local function GetNearbyPosition(npc)
+    local hitboxRadius = 3
     local npcPos = npc.CFrame.Position
-    local direction = (npcPos - humanoidRootPart.Position).Unit
-    local offsetDistance = math.random(3, 5)
-    return npcPos - (direction * offsetDistance)
+    local direction = (humanoidRootPart.Position - npcPos).Unit
+    local offsetDistance = hitboxRadius + math.random(1, 3)
+    return npcPos + (direction * offsetDistance)
 end
 
 local function MoveToCFrame(npc)
