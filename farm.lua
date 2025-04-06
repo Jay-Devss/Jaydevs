@@ -139,11 +139,12 @@ task.spawn(function()
                     -- Press right arrow key once
                     vim:SendKeyEvent(true, "Right", false, game)
                     vim:SendKeyEvent(false, "Right", false, game)
-                    task.wait(0.1)
+                    task.wait(0.5)
 
                     -- Press Enter (Return)
                     vim:SendKeyEvent(true, "Return", false, game)
                     vim:SendKeyEvent(false, "Return", false, game)
+                    task.wait(0.5)
                     vim:SendKeyEvent(true, "Return", false, game)
                     vim:SendKeyEvent(false, "Return", false, game)
                 end
