@@ -109,7 +109,7 @@ task.spawn(function()
             FreezePlayer(true)
             FirePunch(currentTarget.Name)
         end
-        task.wait(0.1)
+        task.wait(0)
     end
     FreezePlayer(false)
 end)
