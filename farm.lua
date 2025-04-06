@@ -38,27 +38,19 @@ local function GetNearbyPosition(npc)
     return npcPos + (direction * offsetDistance)
 end
 
-local function MoveToCFrame(npc, onComplete)
+local function MoveToCFrame(npc)
     local targetPosition = GetNearbyPosition(npc)
     local targetCFrame = CFrame.new(targetPosition)
 
     if getgenv().useTween then
         if tween then tween:Cancel() end
-
         local distance = (humanoidRootPart.Position - targetPosition).Magnitude
         local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
         local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
         tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
-
-        tween.Completed:Once(function()
-            if onComplete then onComplete() end
-        end)
-
         tween:Play()
     else
         humanoidRootPart.CFrame = targetCFrame
-        task.wait(0.3)
-        if onComplete then onComplete() end
     end
 end
 
@@ -78,18 +70,16 @@ end
 
 function FireAriseDestroy(npcName)
     if not getgenv().autoAriseDestroy then return end
-    task.spawn(function()
-        for _ = 1, 3 do
-            game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
-                {
-                    Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
-                    Enemy = npcName
-                },
-                "\4"
-            })
-            task.wait(0.1) -- Ensures proper delay between each fire
-        end
-    end)
+    for _ = 1, 3 do
+        game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+            {
+                Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
+                Enemy = npcName
+            },
+            "\4"
+        })
+        task.wait(0.2)
+    end
 end
 
 local function IsNPCDead(npc)
@@ -111,23 +101,15 @@ task.spawn(function()
     end
 end)
 
-local tweenInProgress = false
-
 task.spawn(function()
     while getgenv().isActive do
         if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
             if currentTarget and IsNPCDead(currentTarget) then
-                local lastTarget = currentTarget
-                currentTarget = nil -- Clear it first to avoid race conditions
-                task.spawn(function()
-                    FireAriseDestroy(lastTarget.Name)
-                end)
-            else
-                currentTarget = nil
+                FireAriseDestroy(currentTarget.Name)
             end
-
+            currentTarget = nil
             for name, npc in pairs(LivingNPCs) do
-                if npc and npc:IsDescendantOf(workspace) and not IsNPCDead(npc) then
+                if npc and not IsNPCDead(npc) then
                     currentTarget = npc
                     MoveToCFrame(npc)
                     break
@@ -137,7 +119,7 @@ task.spawn(function()
             FreezePlayer(true)
             FirePunch(currentTarget.Name)
         end
-        task.wait(0.05)
+        task.wait(0)
     end
     FreezePlayer(false)
 end)
@@ -174,6 +156,3 @@ function AutoLeft()
             task.wait(0.5)
         end
     end)
-end
-
-AutoLeft()
