@@ -118,3 +118,42 @@ task.spawn(function()
     end
     FreezePlayer(false)
 end)
+
+
+getgenv().isAutoLeftActive = true
+
+function AutoLeft()
+    task.spawn(function()
+        while getgenv().isAutoLeftActive do
+            pcall(function()
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                local hud = playerGui and playerGui:FindFirstChild("Hud")
+                local upContainer = hud and hud:FindFirstChild("UpContainer")
+                local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
+
+                if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 10s" then
+                    local vim = game:GetService("VirtualInputManager")
+
+                    vim:SendKeyEvent(true, "BackSlash", false, game)
+                    vim:SendKeyEvent(false, "BackSlash", false, game)
+                    task.wait(0.1)
+                    vim:SendKeyEvent(true, "Right", false, game)
+                    vim:SendKeyEvent(false, "Right", false, game)
+                    task.wait(0.1)
+                    vim:SendKeyEvent(true, "Return", false, game)
+                    vim:SendKeyEvent(false, "Return", false, game)
+                    task.wait(0.1)
+                    vim:SendKeyEvent(true, "Return", false, game)
+                    vim:SendKeyEvent(false, "Return", false, game)
+                    task.wait(0.1)
+                    vim:SendKeyEvent(true, "Return", false, game)
+                    vim:SendKeyEvent(false, "Return", false, game)
+                end
+            end)
+            task.wait(0.5)
+        end
+    end)
+end
+
+AutoLeft()
