@@ -51,7 +51,7 @@ local function MoveToCFrame(npc)
         tween:Play()
     else
         humanoidRootPart.CFrame = targetCFrame
-        task.wait(0.1) -- Give time for the punch and death check
+        task.wait(0.3) -- Give time for the punch and death check
     end
 end
 
