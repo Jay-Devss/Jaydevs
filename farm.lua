@@ -106,9 +106,15 @@ end)
 
 task.spawn(function()
     while getgenv().isActive do
-        local needsNewTarget = false
+        -- Cancel previous tween if any
+        if tween then
+            tween:Cancel()
+            tween = nil
+        end
 
+        -- Check if currentTarget is invalid or dead
         if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
+            -- Fire AriseDestroy asynchronously if target died
             if currentTarget and IsNPCDead(currentTarget) then
                 local oldTarget = currentTarget
                 task.spawn(function()
@@ -116,19 +122,19 @@ task.spawn(function()
                 end)
             end
 
+            -- Clear target before continuing
             currentTarget = nil
-            needsNewTarget = true
-        end
 
-        if needsNewTarget then
+            -- Try to find a new target
             for name, npc in pairs(LivingNPCs) do
                 if npc and npc:IsDescendantOf(workspace) and not IsNPCDead(npc) then
                     currentTarget = npc
-                    MoveToCFrame(npc)
+                    MoveToCFrame(currentTarget)
                     break
                 end
             end
         elseif currentTarget then
+            -- Act on the current valid target
             FreezePlayer(true)
             FirePunch(currentTarget.Name)
         end
