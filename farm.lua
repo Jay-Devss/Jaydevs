@@ -67,7 +67,7 @@ function FireAriseDestroy(npcName)
 				{ Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture", Enemy = npcName },
 				"\4"
 			})
-			task.wait(0.2)
+			task.wait(0.3)
 		end
 	end)
 end
