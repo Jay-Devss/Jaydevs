@@ -124,7 +124,7 @@ task.spawn(function()
         pcall(function()
             local playerGui = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
             local hud = playerGui and playerGui:FindFirstChild("Hud")
-            local upContainer = hud and hud:FindFirstChild("UpContainer")
+            local upContainer = hud and hud:FindFirstChild("UpContanier")
             local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
 
             if dungeonInfo and dungeonInfo:IsA("TextLabel") then
