@@ -7,12 +7,12 @@ local LivingNPCs = {}
 local currentTarget = nil
 local tween = nil
 local lastDeadNPC = nil
-getgenv().isAutoLeftActive= true
+getgenv().isAutoLeftActive = true
 
 local function FreezePlayer(state)
 	if character and character:FindFirstChild("Humanoid") then
 		character.Humanoid.AutoRotate = not state
-		character.Humanoid.WalkSpeed = state and 0 or 16
+		character.Humanoid.WalkSpeed = state and 0
 	end
 end
 
@@ -40,11 +40,10 @@ end
 local function MoveToCFrame(npc)
 	local targetPosition = GetNearbyPosition(npc)
 	local targetCFrame = CFrame.new(targetPosition)
-
 	if getgenv().useTween then
 		if tween then tween:Cancel() end
 		local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-		local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1) -- controlled by user
+		local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
 		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
 		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 		tween:Play()
@@ -87,44 +86,31 @@ end)
 
 task.spawn(function()
 	while getgenv().isActive do
-		GetAllLivingNPCs()
-		task.wait(0.1)
-	end
-end)
-
-task.spawn(function()
-	while getgenv().isActive do
-		if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
-			if currentTarget and IsNPCDead(currentTarget) then
-				lastDeadNPC = currentTarget
-			end
-			currentTarget = nil
-			for name, npc in pairs(LivingNPCs) do
-				if npc and not IsNPCDead(npc) then
+		local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
+		if serverFolder then
+			for _, npc in pairs(serverFolder:GetChildren()) do
+				if npc:IsA("BasePart") and not IsNPCDead(npc) then
+					local name = npc.Name
+					LivingNPCs[name] = npc
 					currentTarget = npc
-					
-					-- 1. Immediately punch
+					FreezePlayer(true)
 					FirePunch(name)
-					
-					-- 2. Then move toward it
 					MoveToCFrame(npc)
-					break
+					repeat
+						if IsNPCDead(npc) then
+							lastDeadNPC = npc
+							break
+						end
+						FirePunch(name)
+						task.wait()
+					until IsNPCDead(npc) or not npc:IsDescendantOf(workspace)
 				end
 			end
 		end
+		LivingNPCs = {}
+		currentTarget = nil
 		task.wait()
 	end
-end)
-
-task.spawn(function()
-	while getgenv().isActive do
-		if currentTarget then
-			FreezePlayer(true)
-			FirePunch(currentTarget.Name)
-		end
-		task.wait()
-	end
-	FreezePlayer(false)
 end)
 
 task.spawn(function()
