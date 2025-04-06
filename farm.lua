@@ -38,7 +38,7 @@ local function GetNearbyPosition(npc)
     return npcPos + (direction * offsetDistance)
 end
 
-local function MoveToCFrame(npc)
+local function MoveToCFrame(npc, onComplete)
     local targetPosition = GetNearbyPosition(npc)
     local targetCFrame = CFrame.new(targetPosition)
 
@@ -48,10 +48,16 @@ local function MoveToCFrame(npc)
         local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
         local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
         tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+
+        tween.Completed:Connect(function()
+            if onComplete then onComplete() end
+        end)
+
         tween:Play()
     else
         humanoidRootPart.CFrame = targetCFrame
-        task.wait(0.3) -- Give time for the punch and death check
+        task.wait(0.3)
+        if onComplete then onComplete() end
     end
 end
 
@@ -100,21 +106,13 @@ end)
 task.spawn(function()
     while getgenv().isActive do
         GetAllLivingNPCs()
-        task.wait(0.5)
+        task.wait(0.1)
     end
 end)
 
 task.spawn(function()
     while getgenv().isActive do
-        -- Cancel previous tween if any
-        if tween then
-            tween:Cancel()
-            tween = nil
-        end
-
-        -- Check if currentTarget is invalid or dead
         if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
-            -- Fire AriseDestroy asynchronously if target died
             if currentTarget and IsNPCDead(currentTarget) then
                 local oldTarget = currentTarget
                 task.spawn(function()
@@ -122,23 +120,26 @@ task.spawn(function()
                 end)
             end
 
-            -- Clear target before continuing
             currentTarget = nil
 
-            -- Try to find a new target
             for name, npc in pairs(LivingNPCs) do
                 if npc and npc:IsDescendantOf(workspace) and not IsNPCDead(npc) then
                     currentTarget = npc
-                    MoveToCFrame(currentTarget)
+                    MoveToCFrame(npc, function()
+                        -- Only freeze and attack after movement completes
+                        FreezePlayer(true)
+                        FirePunch(npc.Name)
+                    end)
                     break
                 end
             end
         elseif currentTarget then
-            -- Act on the current valid target
-            FreezePlayer(true)
-            FirePunch(currentTarget.Name)
+            -- Only attack if not tweening
+            if not getgenv().useTween then
+                FreezePlayer(true)
+                FirePunch(currentTarget.Name)
+            end
         end
-
         task.wait(0.05)
     end
     FreezePlayer(false)
