@@ -51,7 +51,6 @@ local function MoveToCFrame(npc)
         tween:Play()
     else
         humanoidRootPart.CFrame = targetCFrame
-        task.wait(0.1) -- Prevents rapid-fire teleports
     end
 end
 
