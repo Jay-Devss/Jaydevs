@@ -44,12 +44,13 @@ local function MoveToCFrame(npc, onComplete)
 
     if getgenv().useTween then
         if tween then tween:Cancel() end
+
         local distance = (humanoidRootPart.Position - targetPosition).Magnitude
         local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
         local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
         tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 
-        tween.Completed:Connect(function()
+        tween.Completed:Once(function()
             if onComplete then onComplete() end
         end)
 
@@ -110,6 +111,8 @@ task.spawn(function()
     end
 end)
 
+local tweenInProgress = false
+
 task.spawn(function()
     while getgenv().isActive do
         if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
@@ -125,20 +128,16 @@ task.spawn(function()
             for name, npc in pairs(LivingNPCs) do
                 if npc and npc:IsDescendantOf(workspace) and not IsNPCDead(npc) then
                     currentTarget = npc
+                    tweenInProgress = true
                     MoveToCFrame(npc, function()
-                        -- Only freeze and attack after movement completes
-                        FreezePlayer(true)
-                        FirePunch(npc.Name)
+                        tweenInProgress = false
                     end)
                     break
                 end
             end
-        elseif currentTarget then
-            -- Only attack if not tweening
-            if not getgenv().useTween then
-                FreezePlayer(true)
-                FirePunch(currentTarget.Name)
-            end
+        elseif currentTarget and not tweenInProgress then
+            FreezePlayer(true)
+            FirePunch(currentTarget.Name)
         end
         task.wait(0.05)
     end
