@@ -6,8 +6,14 @@ local TweenService = game:GetService("TweenService")
 local LivingNPCs = {}
 local currentTarget = nil
 local tween = nil
-local punching = false
+local lastDeadNPC = nil
+
 getgenv().isAutoLeftActive = true
+getgenv().isActive = true
+getgenv().useTween = true
+getgenv().tweenSpeed = 100
+getgenv().autoAriseDestroy = true
+getgenv().ariseDestroyType = "Destroy"
 
 local function FreezePlayer(state)
 	if character and character:FindFirstChild("Humanoid") then
@@ -40,12 +46,9 @@ end
 local function MoveToCFrame(npc)
 	local targetPosition = GetNearbyPosition(npc)
 	local targetCFrame = CFrame.new(targetPosition)
-
 	if getgenv().useTween then
 		if tween then tween:Cancel() end
-		local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-		local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
-		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+		local tweenInfo = TweenInfo.new(0, Enum.EasingStyle.Linear)
 		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 		tween:Play()
 	else
@@ -54,25 +57,23 @@ local function MoveToCFrame(npc)
 end
 
 local function FirePunch(npcName)
-	if not punching then
-		punching = true
-		game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
-			{ Event = "PunchAttack", Enemy = npcName },
-			"\4"
-		})
-		punching = false
-	end
+	game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+		{ Event = "PunchAttack", Enemy = npcName },
+		"\4"
+	})
 end
 
 function FireAriseDestroy(npcName)
 	if not getgenv().autoAriseDestroy then return end
-	for _ = 1, 3 do
-		game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
-			{ Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture", Enemy = npcName },
-			"\4"
-		})
-		task.wait(0.2)
-	end
+	task.spawn(function()
+		for _ = 1, 3 do
+			game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+				{ Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture", Enemy = npcName },
+				"\4"
+			})
+			task.wait(0.2)
+		end
+	end)
 end
 
 local function IsNPCDead(npc)
@@ -98,7 +99,7 @@ task.spawn(function()
 	while getgenv().isActive do
 		if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
 			if currentTarget and IsNPCDead(currentTarget) then
-				FireAriseDestroy(currentTarget.Name)
+				lastDeadNPC = currentTarget
 			end
 			currentTarget = nil
 			for name, npc in pairs(LivingNPCs) do
@@ -108,25 +109,40 @@ task.spawn(function()
 					break
 				end
 			end
-		elseif currentTarget then
+		end
+		task.wait()
+	end
+end)
+
+task.spawn(function()
+	while getgenv().isActive do
+		if currentTarget then
 			FreezePlayer(true)
 			FirePunch(currentTarget.Name)
 		end
-		task.wait(0)
+		task.wait()
 	end
 	FreezePlayer(false)
+end)
+
+task.spawn(function()
+	while getgenv().isActive do
+		if lastDeadNPC then
+			FireAriseDestroy(lastDeadNPC.Name)
+			lastDeadNPC = nil
+		end
+		task.wait()
+	end
 end)
 
 function AutoLeft()
 	task.spawn(function()
 		while getgenv().isAutoLeftActive do
 			pcall(function()
-				local player = game:GetService("Players").LocalPlayer
 				local playerGui = player:FindFirstChild("PlayerGui")
 				local hud = playerGui and playerGui:FindFirstChild("Hud")
 				local upContainer = hud and hud:FindFirstChild("UpContanier")
 				local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
-
 				if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 10s" then
 					local vim = game:GetService("VirtualInputManager")
 					vim:SendKeyEvent(true, "BackSlash", false, game)
