@@ -118,38 +118,3 @@ task.spawn(function()
     end
     FreezePlayer(false)
 end)
-
-task.spawn(function()
-    while getgenv().isActive do
-        pcall(function()
-            local playerGui = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
-            local hud = playerGui and playerGui:FindFirstChild("Hud")
-            local upContainer = hud and hud:FindFirstChild("UpContanier")
-            local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
-
-            if dungeonInfo and dungeonInfo:IsA("TextLabel") then
-                if dungeonInfo.Text == "Dungeon Ends in 10s" then
-                    local vim = game:GetService("VirtualInputManager")
-
-                    -- Toggle UI navigation (BackSlash)
-                    vim:SendKeyEvent(true, "BackSlash", false, game)
-                    vim:SendKeyEvent(false, "BackSlash", false, game)
-                    task.wait(0.1)
-
-                    -- Press right arrow key once
-                    vim:SendKeyEvent(true, "Right", false, game)
-                    vim:SendKeyEvent(false, "Right", false, game)
-                    task.wait(0.5)
-
-                    -- Press Enter (Return)
-                    vim:SendKeyEvent(true, "Return", false, game)
-                    vim:SendKeyEvent(false, "Return", false, game)
-                    task.wait(0.5)
-                    vim:SendKeyEvent(true, "Return", false, game)
-                    vim:SendKeyEvent(false, "Return", false, game)
-                end
-            end
-        end)
-        task.wait(0.5)
-    end
-end)
