@@ -9,7 +9,7 @@ function NotifyWebhook()
                 local player = game:GetService("Players").LocalPlayer
                 local playerGui = player:FindFirstChild("PlayerGui")
                 local hud = playerGui and playerGui:FindFirstChild("Hud")
-                local upContainer = hud and hud:FindFirstChild("UpContainer")
+                local upContainer = hud and hud:FindFirstChild("UpContanier")
                 local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
 
                 if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 15s" and not sent then
