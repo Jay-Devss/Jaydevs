@@ -3,31 +3,25 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 local TweenService = game:GetService("TweenService")
-local LivingNPCs = {} -- Format: [npc.Name] = {npc = Instance, cframe = CFrame}
+local LivingNPCs = {}
 local currentTarget = nil
 local tween = nil
 local punching = false
-local frozen = false
 
--- Freeze or unfreeze user movement
 local function FreezePlayer(state)
     if character and character:FindFirstChild("Humanoid") then
         character.Humanoid.AutoRotate = not state
         character.Humanoid.WalkSpeed = state and 0 or 16
-        frozen = state
     end
 end
 
--- Update and return list of alive NPCs
 local function GetAllLivingNPCs()
     local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
     if not serverFolder then return {} end
 
-    local activeNames = {}
     for _, npc in pairs(serverFolder:GetChildren()) do
         if npc:IsA("BasePart") then
             local name = npc.Name
-            activeNames[name] = true
             if not LivingNPCs[name] then
                 LivingNPCs[name] = {
                     name = name,
@@ -40,18 +34,8 @@ local function GetAllLivingNPCs()
             end
         end
     end
-
-    -- Remove dead NPCs (not found anymore)
-    for name in pairs(LivingNPCs) do
-        if not activeNames[name] then
-            LivingNPCs[name] = nil
-        end
-    end
-
-    return LivingNPCs
 end
 
--- Tween or teleport to CFrame
 local function MoveToCFrame(cframe)
     if getgenv().useTween then
         if tween then tween:Cancel() end
@@ -65,7 +49,6 @@ local function MoveToCFrame(cframe)
     end
 end
 
--- Call PunchAttack event
 local function FirePunch(npcName)
     if not punching then
         punching = true
@@ -80,10 +63,8 @@ local function FirePunch(npcName)
     end
 end
 
--- AriseDestroy after NPC disappears
-local function FireAriseDestroy(npcName)
+function FireAriseDestroy(npcName)
     if not getgenv().autoAriseDestroy then return end
-    task.wait(0.1)
     for _ = 1, 3 do
         game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
             {
@@ -96,47 +77,44 @@ local function FireAriseDestroy(npcName)
     end
 end
 
--- Handle reset
-local function ResetCharacter()
-    character = player.Character or player.CharacterAdded:Wait()
-    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local function IsNPCDead(npc)
+    local success, hp = pcall(function()
+        return npc:GetAttribute("HP")
+    end)
+    return success and hp == 0
 end
 
-player.CharacterAdded:Connect(ResetCharacter)
+player.CharacterAdded:Connect(function(char)
+    character = char
+    humanoidRootPart = char:WaitForChild("HumanoidRootPart")
+end)
 
--- Background loop to always update LivingNPCs
 task.spawn(function()
     while getgenv().isActive do
         GetAllLivingNPCs()
-        task.wait(0) -- Fastest possible update
+        task.wait(0.1)
     end
 end)
 
--- Main farming loop
 task.spawn(function()
     while getgenv().isActive do
-        -- If currentTarget died or removed
-        if currentTarget and (not LivingNPCs[currentTarget.name] or not currentTarget.npc:IsDescendantOf(workspace)) then
-            task.spawn(function()
+        if not currentTarget or not currentTarget.npc or not currentTarget.npc:IsDescendantOf(workspace) or IsNPCDead(currentTarget.npc) then
+            if currentTarget and IsNPCDead(currentTarget.npc) then
                 FireAriseDestroy(currentTarget.name)
-            end)
-            currentTarget = nil
-            FreezePlayer(false)
-        end
-
-        -- Pick next target instantly
-        if not currentTarget then
-            for name, data in pairs(LivingNPCs) do
-                currentTarget = data
-                MoveToCFrame(data.cframe)
-                break
             end
-        else
+            currentTarget = nil
+            for name, data in pairs(LivingNPCs) do
+                if data.npc and not IsNPCDead(data.npc) then
+                    currentTarget = data
+                    MoveToCFrame(data.cframe)
+                    break
+                end
+            end
+        elseif currentTarget and currentTarget.npc then
             FreezePlayer(true)
             FirePunch(currentTarget.name)
         end
-
-        task.wait(0.01)
+        task.wait(0)
     end
     FreezePlayer(false)
 end)
