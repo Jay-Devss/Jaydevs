@@ -1,4 +1,11 @@
+repeat task.wait() until game:IsLoaded()
+
 local player = game.Players.LocalPlayer
+while not player do
+    task.wait()
+    player = game.Players.LocalPlayer
+end
+
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
@@ -19,7 +26,6 @@ end
 local function GetAllLivingNPCs()
     local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
     if not serverFolder then return end
-
     for _, npc in pairs(serverFolder:GetChildren()) do
         if npc:IsA("BasePart") then
             local name = npc.Name
@@ -41,7 +47,6 @@ end
 local function MoveToCFrame(npc)
     local targetPosition = GetNearbyPosition(npc)
     local targetCFrame = CFrame.new(targetPosition)
-
     if getgenv().useTween then
         if tween then tween:Cancel() end
         local distance = (humanoidRootPart.Position - targetPosition).Magnitude
@@ -133,10 +138,8 @@ function AutoLeft()
                 local hud = playerGui and playerGui:FindFirstChild("Hud")
                 local upContainer = hud and hud:FindFirstChild("UpContanier")
                 local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
-
                 if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 10s" then
                     local vim = game:GetService("VirtualInputManager")
-
                     vim:SendKeyEvent(true, "BackSlash", false, game)
                     vim:SendKeyEvent(false, "BackSlash", false, game)
                     task.wait(0.1)
@@ -156,5 +159,6 @@ function AutoLeft()
             task.wait(0.5)
         end
     end)
+end
 
 AutoLeft()
