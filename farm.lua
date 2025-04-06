@@ -156,3 +156,5 @@ function AutoLeft()
             task.wait(0.5)
         end
     end)
+
+AutoLeft()
