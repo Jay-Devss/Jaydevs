@@ -51,9 +51,9 @@ local function MoveToCFrame(npc)
         tween:Play()
     else
         humanoidRootPart.CFrame = targetCFrame
+        task.wait(0.1) -- Give time for the punch and death check
     end
 end
-
 
 local function FirePunch(npcName)
     if not punching then
@@ -110,9 +110,11 @@ task.spawn(function()
             if currentTarget and IsNPCDead(currentTarget) then
                 FireAriseDestroy(currentTarget.Name)
             end
+
             currentTarget = nil
+
             for name, npc in pairs(LivingNPCs) do
-                if npc and not IsNPCDead(npc) then
+                if npc and npc:IsDescendantOf(workspace) and not IsNPCDead(npc) then
                     currentTarget = npc
                     MoveToCFrame(npc)
                     break
@@ -122,11 +124,10 @@ task.spawn(function()
             FreezePlayer(true)
             FirePunch(currentTarget.Name)
         end
-        task.wait(0)
+        task.wait(0.05)
     end
     FreezePlayer(false)
 end)
-
 function AutoLeft()
     task.spawn(function()
         while getgenv().isAutoLeftActive do
