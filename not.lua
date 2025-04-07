@@ -26,13 +26,13 @@ function NotifyWebhook()
                     local rareAmount = enchRare and enchRare:GetAttribute("Amount") or 0
                     local legendaryAmount = enchLegendary and enchLegendary:GetAttribute("Amount") or 0
 
-                    -- Format time
-                    local time = os.time() + (8 * 3600)
+                    local time = os.time() + (8 * 3600) - (4 * 3600)
                     local hour = tonumber(os.date("%I", time))
                     local minute = os.date("%M", time)
                     local amPm = os.date("%p", time)
                     local formattedTime = string.format("%d:%s %s", hour, minute, amPm)
-
+                    print("Delayed PH Time:", formattedTime)
+                            
                     -- Webhook content
                     local data = {
                         embeds = {{
