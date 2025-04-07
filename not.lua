@@ -31,7 +31,6 @@ function NotifyWebhook()
                     local minute = os.date("%M", time)
                     local amPm = os.date("%p", time)
                     local formattedTime = string.format("%d:%s %s", hour, minute, amPm)
-                    print("Delayed PH Time:", formattedTime)
                             
                     -- Webhook content
                     local data = {
