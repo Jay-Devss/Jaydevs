@@ -8,13 +8,6 @@ local currentTarget = nil
 local tween = nil
 local lastDeadNPC = nil
 
-getgenv().isAutoLeftActive = true
-getgenv().isActive = true
-getgenv().useTween = true
-getgenv().tweenSpeed = 140
-getgenv().autoAriseDestroy = true
-getgenv().ariseDestroyType = "Arise"
-
 local function FreezePlayer(state)
 	if character and character:FindFirstChild("Humanoid") then
 		character.Humanoid.AutoRotate = not state
