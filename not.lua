@@ -26,7 +26,7 @@ function NotifyWebhook()
                     local rareAmount = enchRare and enchRare:GetAttribute("Amount") or 0
                     local legendaryAmount = enchLegendary and enchLegendary:GetAttribute("Amount") or 0
 
-                    local time = os.time() + (8 * 3600) - (8 * 3600)
+                    local time = os.time()
                     local hour = tonumber(os.date("%I", time))
                     local minute = os.date("%M", time)
                     local amPm = os.date("%p", time)
