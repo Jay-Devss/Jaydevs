@@ -145,7 +145,7 @@ function AutoLeft()
 				local hud = playerGui and playerGui:FindFirstChild("Hud")
 				local upContainer = hud and hud:FindFirstChild("UpContanier")
 				local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
-				if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 10s" then
+				if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 12s" then
 					local vim = game:GetService("VirtualInputManager")
 					vim:SendKeyEvent(true, "BackSlash", false, game)
 					vim:SendKeyEvent(false, "BackSlash", false, game)
