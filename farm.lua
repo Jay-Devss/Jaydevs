@@ -7,6 +7,7 @@ local LivingNPCs = {}
 local currentTarget = nil
 local tween = nil
 local lastDeadNPC = nil
+getgenv().isAutoLeftActive = true
 
 local function FreezePlayer(state)
 	if character and character:FindFirstChild("Humanoid") then
