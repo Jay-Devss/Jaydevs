@@ -60,17 +60,17 @@ function NotifyWebhook()
                         -- Build dynamic summary
                         local summaryLines = {}
                         if gainCommon > 0 then
-                            table.insert(summaryLines, string.format("You now have **%d** Common Dust.", endCommon))
+                            table.insert(summaryLines, string.format("You now have %d Common Dust.", endCommon))
                         end
                         if gainRare > 0 then
-                            table.insert(summaryLines, string.format("You now have **%d** Rare Dust.", endRare))
+                            table.insert(summaryLines, string.format("You now have %d Rare Dust.", endRare))
                         end
                         if gainLegendary > 0 then
-                            table.insert(summaryLines, string.format("You now have **%d** Legendary Dust.", endLegendary))
+                            table.insert(summaryLines, string.format("You now have %d Legendary Dust.", endLegendary))
                         end
 
                         local summaryText = (#summaryLines > 0)
-                            and (string.format("You gained **%d dust** in this run.\n%s", totalGained, table.concat(summaryLines, "\n")))
+                            and (string.format("You gained %d dust in this run.\n%s", totalGained, table.concat(summaryLines, "\n")))
                             or "You didn’t gain any dust this run."
 
                         -- Webhook embed
@@ -78,7 +78,7 @@ function NotifyWebhook()
                             embeds = {{
                                 title = titleMsg .. " ✅",
                                 description = string.format(
-                                    "**Player:** %s\n**Time Completed:** %s\n**Duration:** %s\n\n**Dust Gained This Run:**\n- ✨ Common Dust: **+%d**\n- 🔮 Rare Dust: **+%d**\n- 🏆 Legendary Dust: **+%d**\n\n**Summary:**\n%s",
+                                    "Player: %s\nTime Completed: %s\nDuration: %s\n\nDust Gained This Run:\n- ✨ Common Dust: +%d\n- 🔮 Rare Dust: +%d\n- 🏆 Legendary Dust: +%d\n\nSummary:\n%s",
                                     player.Name, timeNow, formattedDuration, gainCommon, gainRare, gainLegendary, summaryText
                                 ),
                                 color = 65280
