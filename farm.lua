@@ -47,15 +47,12 @@ local function MoveToCFrame(npc)
 		if tween then tween:Cancel() end
 		local distance = (humanoidRootPart.Position - targetPosition).Magnitude
 		local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
-		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+		local tweenInfo = TweenInfo.new(0, Enum.EasingStyle.Linear) -- Set duration to 0 for instant teleportation
 		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 		tween:Play()
 	else
-		local hitboxPosition = GetNearbyPosition(npc)
-		local duration = 0
-		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear) 
-		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(hitboxPosition)})
-		tween:Play() 
+		local hitboxPosition = GetNearbyPosition(npc) -- Using the calculated target position (hitbox)
+		humanoidRootPart.CFrame = CFrame.new(hitboxPosition) -- Teleport to hitbox
 	end
 end
 
