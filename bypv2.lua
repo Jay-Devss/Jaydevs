@@ -21,66 +21,82 @@ end
 local function buyDungeonTicket()
     fireDungeonEvent({
         {
-            Type = "Gems",
-            Event = "DungeonAction",
-            Action = "BuyTicket"
-        },
-        "\n"
+            {
+                ["Type"] = "Gems",
+                ["Event"] = "DungeonAction",
+                ["Action"] = "BuyTicket"
+            },
+            "\n"
+        }
     })
 end
 
 local function createDungeon()
     fireDungeonEvent({
         {
-            Event = "DungeonAction",
-            Action = "Create"
-        },
-        "\n"
+            {
+                ["Event"] = "DungeonAction",
+                ["Action"] = "Create"
+            },
+            "\n"
+        }
     })
 end
 
 local function addUltimateRune()
     fireDungeonEvent({
         {
-            Dungeon = fixedDungeonID,
-            Action = "AddItems",
-            Slot = 1,
-            Event = "DungeonAction",
-            Item = "DgURankUpRune"
-        },
-        "\n"
+            {
+                ["Dungeon"] = fixedDungeonID,
+                ["Action"] = "AddItems",
+                ["Slot"] = 1,
+                ["Event"] = "DungeonAction",
+                ["Item"] = "DgURankUpRune"
+            },
+            "\n"
+        }
     })
 end
 
 local function startDungeon()
     fireDungeonEvent({
         {
-            Dungeon = fixedDungeonID,
-            Event = "DungeonAction",
-            Action = "Start"
-        },
-        "\n"
+            {
+                ["Dungeon"] = fixedDungeonID,
+                ["Event"] = "DungeonAction",
+                ["Action"] = "Start"
+            },
+            "\n"
+        }
     })
 end
 
 local function tryJoinCastle()
-    local hour = os.date("*t").hour
     local minute = os.date("*t").min
-    local gameInfo = MarketplaceService:GetProductInfo(game.PlaceId)
-    local gameName = gameInfo.Name
-
-    if string.find(gameName, "Dungeon") then
-        notify("Dungeon Running", "You are currently doing a Dungeon raid. Please finish it before bypassing!", 5)
-        return
-    end
+    local gameName = nil
 
     if minute >= 45 and minute <= 59 then
+        local success, result = pcall(function()
+            return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+        end)
+
+        if success then
+            gameName = result
+            if string.find(gameName, "Dungeon") then
+                notify("Dungeon Running", "You are currently doing a Dungeon raid. Please finish it before bypassing!", 5)
+                return
+            end
+        end
+
         fireDungeonEvent({
             {
-                Event = "JoinCastle"
-            },
-            "\n"
+                {
+                    ["Event"] = "JoinCastle"
+                },
+                "\n"
+            }
         })
+
         notify("Castle Join", "You have joined the castle event!", 5)
         return true
     else
