@@ -32,7 +32,7 @@ function NotifyWebhook()
                 if dungeonInfo and dungeonInfo:IsA("TextLabel") then
                     local text = dungeonInfo.Text
 
-                    if text:find("DOUBLE DUNGEON APPEAR") then
+                    if text == "DOUBLE DUNGEON APPEAR" then
                         isDoubleDungeon = true
                     end
 
