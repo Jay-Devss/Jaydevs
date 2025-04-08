@@ -4,7 +4,8 @@ local dataRemoteEvent = ReplicatedStorage:WaitForChild("BridgeNet2"):WaitForChil
 local MarketplaceService = game:GetService("MarketplaceService")
 
 local fixedDungeonID = 7948501548
-local delay = 0.5
+local delay = 1
+getgenv().UltimateDungeon = getgenv().UltimateDungeon or false
 
 local function fireDungeonEvent(argsTable)
     dataRemoteEvent:FireServer(unpack(argsTable))
