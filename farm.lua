@@ -7,6 +7,7 @@ local LivingNPCs = {}
 local currentTarget = nil
 local tween = nil
 local lastDeadNPC = nil
+local targetCFramePosition = nil
 getgenv().isAutoLeftActive = true
 
 local function FreezePlayer(state)
@@ -39,12 +40,13 @@ end
 
 local function MoveToCFrame(npc)
 	local targetPosition = GetNearbyPosition(npc)
+	targetCFramePosition = targetPosition
 	local targetCFrame = CFrame.new(targetPosition)
 
 	if getgenv().useTween then
 		if tween then tween:Cancel() end
 		local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-		local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1) -- controlled by user
+		local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
 		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
 		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 		tween:Play()
@@ -102,11 +104,7 @@ task.spawn(function()
 			for name, npc in pairs(LivingNPCs) do
 				if npc and not IsNPCDead(npc) then
 					currentTarget = npc
-					
-					-- 1. Immediately punch
 					FirePunch(name)
-					
-					-- 2. Then move toward it
 					MoveToCFrame(npc)
 					break
 				end
@@ -137,43 +135,74 @@ task.spawn(function()
 	end
 end)
 
-function AutoLeft()
-	task.spawn(function()
-		while getgenv().isAutoLeftActive do
-			pcall(function()
-				local playerGui = player:FindFirstChild("PlayerGui")
-				local hud = playerGui and playerGui:FindFirstChild("Hud")
-				local upContainer = hud and hud:FindFirstChild("UpContanier")
-				local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
-				if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 12s" then
-					local vim = game:GetService("VirtualInputManager")
-					vim:SendKeyEvent(true, "BackSlash", false, game)
-					vim:SendKeyEvent(false, "BackSlash", false, game)
-					task.wait(0.5)
-					vim:SendKeyEvent(true, "Right", false, game)
-					vim:SendKeyEvent(false, "Right", false, game)
-					task.wait(0.5)
-					vim:SendKeyEvent(true, "Return", false, game)
-					vim:SendKeyEvent(false, "Return", false, game)
-					task.wait(0.2)
-					vim:SendKeyEvent(true, "Return", false, game)
-					vim:SendKeyEvent(false, "Return", false, game)
-					task.wait(0.2)
-					vim:SendKeyEvent(true, "Return", false, game)
-					vim:SendKeyEvent(false, "Return", false, game)
-				end
-			end)
-			task.wait(0.5)
-		end
-	end)
-end
-
-AutoLeft()
+task.spawn(function()
+	while getgenv().isAutoLeftActive do
+		pcall(function()
+			local playerGui = player:FindFirstChild("PlayerGui")
+			local hud = playerGui and playerGui:FindFirstChild("Hud")
+			local upContainer = hud and hud:FindFirstChild("UpContanier")
+			local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
+			if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 12s" then
+				local vim = game:GetService("VirtualInputManager")
+				vim:SendKeyEvent(true, "BackSlash", false, game)
+				vim:SendKeyEvent(false, "BackSlash", false, game)
+				task.wait(0.5)
+				vim:SendKeyEvent(true, "Right", false, game)
+				vim:SendKeyEvent(false, "Right", false, game)
+				task.wait(0.5)
+				vim:SendKeyEvent(true, "Return", false, game)
+				vim:SendKeyEvent(false, "Return", false, game)
+				task.wait(0.2)
+				vim:SendKeyEvent(true, "Return", false, game)
+				vim:SendKeyEvent(false, "Return", false, game)
+				task.wait(0.2)
+				vim:SendKeyEvent(true, "Return", false, game)
+				vim:SendKeyEvent(false, "Return", false, game)
+			end
+		end)
+		task.wait(0.5)
+	end
+end)
 
 local VirtualUser = game:GetService("VirtualUser")
 
 game:GetService("Players").LocalPlayer.Idled:Connect(function()
-    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    task.wait(1)
-    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+	VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+	task.wait(1)
+	VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
+
+task.spawn(function()
+	while getgenv().isActive do
+		if character and character:FindFirstChild("Humanoid") then
+			if character.Humanoid.Sit then
+				character.Humanoid.Sit = false
+			end
+		end
+		task.wait(0.1)
+	end
+end)
+
+task.spawn(function()
+	while getgenv().isActive do
+		if humanoidRootPart then
+			humanoidRootPart.Anchored = false
+			humanoidRootPart.Velocity = Vector3.zero
+		end
+		task.wait(0.5)
+	end
+end)
+
+task.spawn(function()
+	while getgenv().isActive do
+		pcall(function()
+			if currentTarget and targetCFramePosition then
+				local distance = (humanoidRootPart.Position - targetCFramePosition).Magnitude
+				if distance > 5 then
+					MoveToCFrame(currentTarget)
+				end
+			end
+		end)
+		task.wait(1)
+	end
 end)
