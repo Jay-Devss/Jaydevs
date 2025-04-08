@@ -1,0 +1,119 @@
+local jay = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua", true))()
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local dataRemoteEvent = ReplicatedStorage:WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent")
+local MarketplaceService = game:GetService("MarketplaceService")
+
+local fixedDungeonID = 7948501548
+local delay = 0.5
+
+local function fireDungeonEvent(argsTable)
+    dataRemoteEvent:FireServer(unpack(argsTable))
+end
+
+local function notify(title, content, duration)
+    jay:Notify({
+        Title = title,
+        Content = content,
+        Duration = duration or 5
+    })
+end
+
+local function buyDungeonTicket()
+    fireDungeonEvent({
+        {
+            Type = "Gems",
+            Event = "DungeonAction",
+            Action = "BuyTicket"
+        },
+        "\n"
+    })
+end
+
+local function createDungeon()
+    fireDungeonEvent({
+        {
+            Event = "DungeonAction",
+            Action = "Create"
+        },
+        "\n"
+    })
+end
+
+local function addUltimateRune()
+    fireDungeonEvent({
+        {
+            Dungeon = fixedDungeonID,
+            Action = "AddItems",
+            Slot = 1,
+            Event = "DungeonAction",
+            Item = "DgURankUpRune"
+        },
+        "\n"
+    })
+end
+
+local function startDungeon()
+    fireDungeonEvent({
+        {
+            Dungeon = fixedDungeonID,
+            Event = "DungeonAction",
+            Action = "Start"
+        },
+        "\n"
+    })
+end
+
+local function tryJoinCastle()
+    local hour = os.date("*t").hour
+    local minute = os.date("*t").min
+    local gameInfo = MarketplaceService:GetProductInfo(game.PlaceId)
+    local gameName = gameInfo.Name
+
+    if string.find(gameName, "Dungeon") then
+        notify("Dungeon Running", "You are currently doing a Dungeon raid. Please finish it before bypassing!", 5)
+        return
+    end
+
+    if minute >= 45 and minute <= 59 then
+        fireDungeonEvent({
+            {
+                Event = "JoinCastle"
+            },
+            "\n"
+        })
+        notify("Castle Join", "You have joined the castle event!", 5)
+        return true
+    else
+        notify("Castle Join Skipped", "Not within Castle join time window (XX:45 - XX:59).", 5)
+        return false
+    end
+end
+
+local function runDungeonBypass()
+    local success, err = pcall(function()
+        if getgenv().autoCastle and tryJoinCastle() then
+            return
+        end
+
+        buyDungeonTicket()
+        task.wait(delay)
+
+        createDungeon()
+        task.wait(delay)
+
+        if getgenv().UltimateDungeon then
+            addUltimateRune()
+            task.wait(delay)
+        end
+
+        startDungeon()
+
+        notify("Dungeon Started", "Dungeon started with ID: " .. fixedDungeonID .. (getgenv().UltimateDungeon and " + Rune!" or "!"), 5)
+    end)
+
+    if not success then
+        notify("Error", "Something went wrong: " .. tostring(err), 6)
+    end
+end
+
+runDungeonBypass()
