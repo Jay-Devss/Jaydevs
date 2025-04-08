@@ -1,14 +1,25 @@
 getgenv().Webhook = getgenv().Webhook or "https://ap-is-ivory.vercel.app/api/webhook"
 getgenv().isWebhookActive = true
 
-local function escape(text)
-    return text:gsub("([%-%[%]%(%)%.%+%*%?%^%$])", "\\%1")
-end
-
 function NotifyWebhook()
     task.spawn(function()
         local sent = false
         local startTime = os.time()
+        local startCommon, startRare, startLegendary = 0, 0, 0
+        local isDoubleDungeon = false
+
+        -- Get starting dust
+        local function getStartingDust()
+            local player = game:GetService("Players").LocalPlayer
+            local leaderstats = player:FindFirstChild("leaderstats")
+            local inventory = leaderstats and leaderstats:FindFirstChild("Inventory")
+            local items = inventory and inventory:FindFirstChild("Items")
+            startCommon = (items and items:FindFirstChild("EnchCommon") and items.EnchCommon:GetAttribute("Amount")) or 0
+            startRare = (items and items:FindFirstChild("EnchRare") and items.EnchRare:GetAttribute("Amount")) or 0
+            startLegendary = (items and items:FindFirstChild("EnchLegendary") and items.EnchLegendary:GetAttribute("Amount")) or 0
+        end
+
+        getStartingDust()
 
         while getgenv().isWebhookActive do
             pcall(function()
@@ -18,71 +29,74 @@ function NotifyWebhook()
                 local upContainer = hud and hud:FindFirstChild("UpContanier")
                 local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
 
-                if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 12s" and not sent then
-                    sent = true
+                if dungeonInfo and dungeonInfo:IsA("TextLabel") then
+                    local text = dungeonInfo.Text
 
-                    local leaderstats = player:FindFirstChild("leaderstats")
-                    local inventory = leaderstats and leaderstats:FindFirstChild("Inventory")
-                    local items = inventory and inventory:FindFirstChild("Items")
-                    local enchCommon = items and items:FindFirstChild("EnchCommon")
-                    local enchRare = items and items:FindFirstChild("EnchRare")
-                    local enchLegendary = items and items:FindFirstChild("EnchLegendary")
-
-                    local commonStart = enchCommon and enchCommon:GetAttribute("Amount") or 0
-                    local rareStart = enchRare and enchRare:GetAttribute("Amount") or 0
-                    local legendaryStart = enchLegendary and enchLegendary:GetAttribute("Amount") or 0
-
-                    local commonEnd = enchCommon and enchCommon:GetAttribute("Amount") or 0
-                    local rareEnd = enchRare and enchRare:GetAttribute("Amount") or 0
-                    local legendaryEnd = enchLegendary and enchLegendary:GetAttribute("Amount") or 0
-
-                    local gainCommon = commonEnd - commonStart
-                    local gainRare = rareEnd - rareStart
-                    local gainLegendary = legendaryEnd - legendaryStart
-
-                    local endTime = os.time()
-                    local duration = endTime - startTime
-                    local minutes = math.floor(duration / 60)
-                    local seconds = duration % 60
-                    local formattedDuration = string.format("%d minute(s) %d second(s)", minutes, seconds)
-
-                    local timeNow = os.date("%I:%M:%S %p", endTime)
-                    local summaryText = ""
-
-                    if gainCommon > 0 then
-                        summaryText = string.format("You gained *%d* common dust in this run.\n", gainCommon)
+                    if text:find("DOUBLE DUNGEON APPEAR") then
+                        isDoubleDungeon = true
                     end
-                    if gainRare > 0 then
-                        summaryText = string.format("You gained *%d* rare dust in this run.\n", gainRare)
-                    end
-                    if gainLegendary > 0 then
-                        summaryText = string.format("You gained *%d* legendary dust in this run.\n", gainLegendary)
-                    end
-                    
-                    local titleMsg = "You completed a Dungeon ✅"
 
-                    local description = string.format(
-                        "*%s*\n\n*Player:* %s\n*Time Completed:* %s\n*Duration:* %s\n\n*Dust Gained This Run:*\n- ✨ Common Dust: +%d\n- 🔮 Rare Dust: +%d\n- 🏆 Legendary Dust: +%d\n\n*Summary:*\n%s",
-                        escape(titleMsg), escape(player.Name), escape(timeNow), escape(formattedDuration),
-                        gainCommon, gainRare, gainLegendary, escape(summaryText)
-                    )
+                    if text == "Dungeon Ends in 12s" and not sent then
+                        sent = true
+                        local endTime = os.time()
+                        local duration = os.difftime(endTime, startTime)
 
-                    local data = {
-                        text = description,
-                        parse_mode = "MarkdownV2"
-                    }
+                        local leaderstats = player:FindFirstChild("leaderstats")
+                        local inventory = leaderstats and leaderstats:FindFirstChild("Inventory")
+                        local items = inventory and inventory:FindFirstChild("Items")
+                        local endCommon = (items and items:FindFirstChild("EnchCommon") and items.EnchCommon:GetAttribute("Amount")) or 0
+                        local endRare = (items and items:FindFirstChild("EnchRare") and items.EnchRare:GetAttribute("Amount")) or 0
+                        local endLegendary = (items and items:FindFirstChild("EnchLegendary") and items.EnchLegendary:GetAttribute("Amount")) or 0
 
-                    local jsonData = game:GetService("HttpService"):JSONEncode(data)
-                    local requestFunction = (http_request or request or syn.request or fluxus.request)
-                    if requestFunction then
-                        requestFunction({
-                            Url = getgenv().Webhook,
-                            Method = "POST",
-                            Headers = {["Content-Type"] = "application/json"},
-                            Body = jsonData
-                        })
-                    else
-                        warn("HTTP requests not supported.")
+                        local gainCommon = endCommon - startCommon
+                        local gainRare = endRare - startRare
+                        local gainLegendary = endLegendary - startLegendary
+
+                        local totalGained = gainCommon + gainRare + gainLegendary
+                        local formattedDuration = string.format("%d minute(s) %d second(s)", math.floor(duration / 60), duration % 60)
+                        local timeNow = os.date("%I:%M:%S %p", endTime)
+                        local titleMsg = isDoubleDungeon and "You completed a Double Dungeon" or "You completed a Dungeon"
+
+                        -- Build dynamic summary
+                        local summaryLines = {}
+                        if gainCommon > 0 then
+                            table.insert(summaryLines, string.format("You now have **%d** Common Dust.", endCommon))
+                        end
+                        if gainRare > 0 then
+                            table.insert(summaryLines, string.format("You now have **%d** Rare Dust.", endRare))
+                        end
+                        if gainLegendary > 0 then
+                            table.insert(summaryLines, string.format("You now have **%d** Legendary Dust.", endLegendary))
+                        end
+
+                        local summaryText = (#summaryLines > 0)
+                            and (string.format("You gained **%d dust** in this run.\n%s", totalGained, table.concat(summaryLines, "\n")))
+                            or "You didn’t gain any dust this run."
+
+                        -- Webhook embed
+                        local data = {
+                            embeds = {{
+                                title = titleMsg .. " ✅",
+                                description = string.format(
+                                    "**Player:** %s\n**Time Completed:** %s\n**Duration:** %s\n\n**Dust Gained This Run:**\n- ✨ Common Dust: **+%d**\n- 🔮 Rare Dust: **+%d**\n- 🏆 Legendary Dust: **+%d**\n\n**Summary:**\n%s",
+                                    player.Name, timeNow, formattedDuration, gainCommon, gainRare, gainLegendary, summaryText
+                                ),
+                                color = 65280
+                            }}
+                        }
+
+                        local jsonData = game:GetService("HttpService"):JSONEncode(data)
+                        local requestFunction = (http_request or request or syn.request or fluxus.request)
+                        if requestFunction then
+                            requestFunction({
+                                Url = getgenv().Webhook,
+                                Method = "POST",
+                                Headers = {["Content-Type"] = "application/json"},
+                                Body = jsonData
+                            })
+                        else
+                            warn("HTTP requests not supported.")
+                        end
                     end
                 end
             end)
