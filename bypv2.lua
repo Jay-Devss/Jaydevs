@@ -3,9 +3,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local dataRemoteEvent = ReplicatedStorage:WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent")
 local MarketplaceService = game:GetService("MarketplaceService")
 
-local fixedDungeonID = 7948501548
-local delay = 1
 getgenv().UltimateDungeon = getgenv().UltimateDungeon or false
+local fixedDungeonID = 7948501548
+local delay = 0.5
 
 local function fireDungeonEvent(argsTable)
     dataRemoteEvent:FireServer(unpack(argsTable))
@@ -17,6 +17,19 @@ local function notify(title, content, duration)
         Content = content,
         Duration = duration or 5
     })
+end
+
+local function isInDungeonGame()
+    local gameName = nil
+    local success, result = pcall(function()
+        return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+    end)
+
+    if success then
+        gameName = result
+        return string.find(gameName, "Dungeon") ~= nil
+    end
+    return false
 end
 
 local function buyDungeonTicket()
@@ -108,6 +121,11 @@ end
 
 local function runDungeonBypass()
     local success, err = pcall(function()
+        if isInDungeonGame() then
+            notify("Dungeon Running", "You are currently in a Dungeon game. Please finish the current dungeon first before bypassing.", 5)
+            return
+        end
+
         if getgenv().autoCastle and tryJoinCastle() then
             return
         end
