@@ -51,7 +51,11 @@ local function MoveToCFrame(npc)
 		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 		tween:Play()
 	else
-		humanoidRootPart.CFrame = targetCFrame
+		local hitboxPosition = GetNearbyPosition(npc)
+		local duration = 0
+		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear) 
+		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(hitboxPosition)})
+		tween:Play() 
 	end
 end
 
