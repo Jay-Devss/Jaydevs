@@ -41,10 +41,6 @@ function NotifyWebhook()
         getStartingDust()
         recordInitialJinWoos()
 
-        for i, name in ipairs(initialJinWoos) do
-            print(i, name)
-        end
-
         while getgenv().isWebhookActive do
             pcall(function()
                 local playerGui = player:FindFirstChild("PlayerGui")
@@ -95,7 +91,6 @@ function NotifyWebhook()
                             and (string.format("You gained %d dust in this run.\n%s", totalGained, table.concat(summaryLines, "\n")))
                             or "You didn’t gain any dust this run."
 
-                        -- Check for new JinWoo pets
                         local newJinWooMessage = nil
                         local petsFolder = inventory and inventory:FindFirstChild("Pets")
                         if petsFolder then
@@ -124,7 +119,7 @@ function NotifyWebhook()
                         )
 
                         if newJinWooMessage then
-                            embedDesc = embedDesc .. "\n\n**Rewards:**\n- " .. newJinWooMessage
+                            embedDesc = embedDesc .. "\n\nYou got rewards:\n- " .. newJinWooMessage
                         end
 
                         local data = {
