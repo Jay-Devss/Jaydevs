@@ -51,7 +51,16 @@ local function MoveToCFrame(npc)
 		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 		tween:Play()
 	else
-		player.Character:PivotTo(CFrame.new(GetNearbyPosition(npc)))
+		local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+		if distance <= 20 then
+			player.Character:PivotTo(targetCFrame)
+		else
+			if tween then tween:Cancel() end
+			local duration = math.clamp(distance / 1000, 0.05, 0.15)
+			local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+			tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+			tween:Play()
+		end
 	end
 end
 
