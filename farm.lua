@@ -117,11 +117,10 @@ task.spawn(function()
 					if getgenv().useTween then
 						MoveToCFrame(npc)
 					else
-						task.delay(1, function()
-							if currentTarget == npc then
-								MoveToCFrame(npc)
-							end
-						end)
+						task.wait(0.8)
+						if currentTarget == npc then
+							MoveToCFrame(npc)
+						end
 					end
 					break
 				end
