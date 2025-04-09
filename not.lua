@@ -7,10 +7,29 @@ function NotifyWebhook()
         local startTime = os.time()
         local startCommon, startRare, startLegendary = 0, 0, 0
         local isDoubleDungeon = false
+        local initialJinWoos = {}
 
-        -- Get starting dust
+        local player = game:GetService("Players").LocalPlayer
+
+        -- Rank mapping
+        local rankMap = {
+            [1] = "E", [2] = "D", [3] = "C", [4] = "B", [5] = "A",
+            [6] = "S", [7] = "SS", [8] = "G", [9] = "N"
+        }
+
+        -- Store JinWoo pets before dungeon
+        local function recordInitialJinWoos()
+            local petsFolder = player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Inventory") and player.leaderstats.Inventory:FindFirstChild("Pets")
+            if petsFolder then
+                for _, pet in pairs(petsFolder:GetChildren()) do
+                    if pet:IsA("Folder") and pet.Name:sub(1, 6) == "JinWoo" then
+                        table.insert(initialJinWoos, pet.Name)
+                    end
+                end
+            end
+        end
+
         local function getStartingDust()
-            local player = game:GetService("Players").LocalPlayer
             local leaderstats = player:FindFirstChild("leaderstats")
             local inventory = leaderstats and leaderstats:FindFirstChild("Inventory")
             local items = inventory and inventory:FindFirstChild("Items")
@@ -20,10 +39,14 @@ function NotifyWebhook()
         end
 
         getStartingDust()
+        recordInitialJinWoos()
+
+        for i, name in ipairs(initialJinWoos) do
+            print(i, name)
+        end
 
         while getgenv().isWebhookActive do
             pcall(function()
-                local player = game:GetService("Players").LocalPlayer
                 local playerGui = player:FindFirstChild("PlayerGui")
                 local hud = playerGui and playerGui:FindFirstChild("Hud")
                 local upContainer = hud and hud:FindFirstChild("UpContanier")
@@ -57,7 +80,6 @@ function NotifyWebhook()
                         local timeNow = os.date("%I:%M:%S %p", endTime)
                         local titleMsg = isDoubleDungeon and "You completed a Double Dungeon" or "You completed a Dungeon"
 
-                        -- Build dynamic summary
                         local summaryLines = {}
                         if gainCommon > 0 then
                             table.insert(summaryLines, string.format("You now have %d Common Dust.", endCommon))
@@ -73,14 +95,42 @@ function NotifyWebhook()
                             and (string.format("You gained %d dust in this run.\n%s", totalGained, table.concat(summaryLines, "\n")))
                             or "You didn’t gain any dust this run."
 
-                        -- Webhook embed
+                        -- Check for new JinWoo pets
+                        local newJinWooMessage = nil
+                        local petsFolder = inventory and inventory:FindFirstChild("Pets")
+                        if petsFolder then
+                            for _, pet in pairs(petsFolder:GetChildren()) do
+                                if pet:IsA("Folder") and pet.Name:sub(1, 6) == "JinWoo" then
+                                    local alreadyHad = false
+                                    for _, oldPet in pairs(initialJinWoos) do
+                                        if pet.Name == oldPet then
+                                            alreadyHad = true
+                                            break
+                                        end
+                                    end
+                                    if not alreadyHad then
+                                        local rankVal = pet:GetAttribute("Rank")
+                                        local rankLetter = rankMap[rankVal] or ("Unknown Rank: " .. tostring(rankVal))
+                                        newJinWooMessage = "Sung Jin Woo Rank: " .. rankLetter
+                                        break -- only care about the first new one
+                                    end
+                                end
+                            end
+                        end
+
+                        local embedDesc = string.format(
+                            "Player: %s\nTime Completed: %s\nDuration: %s\n\nDust Gained This Run:\n- ✨ Common Dust: +%d\n- 🔮 Rare Dust: +%d\n- 🏆 Legendary Dust: +%d\n\nSummary:\n%s",
+                            player.Name, timeNow, formattedDuration, gainCommon, gainRare, gainLegendary, summaryText
+                        )
+
+                        if newJinWooMessage then
+                            embedDesc = embedDesc .. "\n\n**Rewards:**\n- " .. newJinWooMessage
+                        end
+
                         local data = {
                             embeds = {{
                                 title = titleMsg .. " ✅",
-                                description = string.format(
-                                    "Player: %s\nTime Completed: %s\nDuration: %s\n\nDust Gained This Run:\n- ✨ Common Dust: +%d\n- 🔮 Rare Dust: +%d\n- 🏆 Legendary Dust: +%d\n\nSummary:\n%s",
-                                    player.Name, timeNow, formattedDuration, gainCommon, gainRare, gainLegendary, summaryText
-                                ),
+                                description = embedDesc,
                                 color = 65280
                             }}
                         }
