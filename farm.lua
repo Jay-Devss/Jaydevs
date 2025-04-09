@@ -114,7 +114,15 @@ task.spawn(function()
 				if npc and not IsNPCDead(npc) then
 					currentTarget = npc
 					FirePunch(name)
-					MoveToCFrame(npc)
+					if getgenv().useTween then
+						MoveToCFrame(npc)
+					else
+						task.delay(0.7, function()
+							if currentTarget == npc then
+								MoveToCFrame(npc)
+							end
+						end)
+					end
 					break
 				end
 			end
