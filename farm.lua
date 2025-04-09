@@ -39,17 +39,6 @@ local function GetNearbyPosition(npc)
 end
 
 local function MoveToCFrame(npc)
-	local function SafePivotTo(targetCFrame)
-		local current = humanoidRootPart.Position
-		local target = targetCFrame.Position
-		local direction = (target - current).Unit
-		local distance = (target - current).Magnitude
-		local maxStep = 20
-		local step = math.min(distance, maxStep)
-		local nextPos = current + direction * step
-		player.Character:PivotTo(CFrame.new(nextPos))
-	end
-
 	local targetPosition = GetNearbyPosition(npc)
 	targetCFramePosition = targetPosition
 	local targetCFrame = CFrame.new(targetPosition)
@@ -62,7 +51,7 @@ local function MoveToCFrame(npc)
 		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 		tween:Play()
 	else
-		SafePivotTo(targetCFrame)
+		player.Character:PivotTo(CFrame.new(GetNearbyPosition(npc)))
 	end
 end
 
