@@ -51,8 +51,7 @@ local function MoveToCFrame(npc)
 		tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
 		tween:Play()
 	else
-		local hitboxPosition = GetNearbyPosition(npc) -- Using the calculated target position (hitbox)
-		humanoidRootPart.CFrame = CFrame.new(hitboxPosition) -- Teleport to hitbox
+		player.Character:PivotTo(CFrame.new(GetNearbyPosition(npc)))
 	end
 end
 
