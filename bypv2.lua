@@ -11,6 +11,22 @@ local function fireDungeonEvent(argsTable)
     dataRemoteEvent:FireServer(unpack(argsTable))
 end
 
+local function buyUltimate()
+    local args = {
+    [1] = {
+        [1] = {
+            ["Action"] = "Buy",
+            ["Shop"] = "RuneShop",
+            ["Item"] = "DgURankUpRune",
+            ["Event"] = "ItemShopAction"
+        },
+        [2] = "\n"
+    }
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+end
+
 local function notify(title, content, duration)
     jay:Notify({
         Title = title,
@@ -130,6 +146,7 @@ local function runDungeonBypass()
             return
         end
 
+        buyUltimate()
         buyDungeonTicket()
         task.wait(delay)
 
