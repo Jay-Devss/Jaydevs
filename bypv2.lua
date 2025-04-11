@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local dataRemoteEvent = ReplicatedStorage:WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent")
 local MarketplaceService = game:GetService("MarketplaceService")
 
-getgenv().UltimateDungeon = getgenv().UltimateDungeon or true
+getgenv().UltimateDungeon = getgenv().UltimateDungeon or false
 local fixedDungeonID = 7948501548
 local delay = 0.5
 
