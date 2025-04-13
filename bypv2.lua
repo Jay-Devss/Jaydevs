@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
 getgenv().UltimateDungeon = getgenv().UltimateDungeon or false
+local targetUser = "Jayalwayspaldooo7"
 local fixedDungeonID = 7948501548
 local delay = 0.5
 
@@ -26,7 +27,6 @@ local function isInDungeonGame()
     local success, result = pcall(function()
         return MarketplaceService:GetProductInfo(game.PlaceId).Name
     end)
-
     if success then
         gameName = result
         return string.find(gameName, "Dungeon") ~= nil
@@ -90,12 +90,10 @@ end
 local function tryJoinCastle()
     local minute = os.date("*t").min
     local gameName = nil
-
     if minute >= 45 and minute <= 59 then
         local success, result = pcall(function()
             return MarketplaceService:GetProductInfo(game.PlaceId).Name
         end)
-
         if success then
             gameName = result
             if string.find(gameName, "Dungeon") then
@@ -103,7 +101,6 @@ local function tryJoinCastle()
                 return
             end
         end
-
         fireDungeonEvent({
             {
                 {
@@ -112,7 +109,6 @@ local function tryJoinCastle()
                 "\n"
             }
         })
-
         notify("Castle Join", "You have joined the castle event!", 5)
         return true
     else
@@ -127,27 +123,51 @@ local function runDungeonBypass()
             notify("Dungeon Running", "You are currently in a Dungeon game. Please finish the current dungeon first before bypassing.", 5)
             return
         end
-
         if getgenv().autoCastle and tryJoinCastle() then
             return
         end
-
+        if getgenv().autoJoinJay and player.Name ~= targetUser then
+            local found = false
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Name == targetUser then
+                    found = true
+                    break
+                end
+            end
+            if found then
+                while true do
+                    local stillExists = Players:FindFirstChild(targetUser)
+                    if not stillExists then
+                        break
+                    end
+                    buyDungeonTicket()
+                    task.wait(delay)
+                    fireDungeonEvent({
+                        {
+                            {
+                                ["Dungeon"] = fixedDungeonID,
+                                ["Event"] = "DungeonAction",
+                                ["Action"] = "Join"
+                            },
+                            "\n"
+                        }
+                    })
+                    task.wait(1.5)
+                end
+                return
+            end
+        end
         buyDungeonTicket()
         task.wait(delay)
-
         createDungeon()
         task.wait(3)
-
         if getgenv().UltimateDungeon then
             addUltimateRune()
             task.wait(delay)
         end
-
         startDungeon()
-
         notify("Dungeon Started", "Dungeon started with ID: " .. fixedDungeonID .. (getgenv().UltimateDungeon and " + Rune!" or "!"), 5)
     end)
-
     if not success then
         notify("Error", "Something went wrong: " .. tostring(err), 6)
     end
@@ -186,7 +206,6 @@ end
 
 local function autoRejoin()
     local rejoinCooldown = false
-
     task.spawn(function()
         while getgenv().isAutoRejoinActive do
             pcall(function()
@@ -196,20 +215,46 @@ local function autoRejoin()
                 local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
                 if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 12s" and not rejoinCooldown then
                     rejoinCooldown = true
-
+                    if getgenv().autoJoinJay and player.Name ~= targetUser then
+                        local found = false
+                        for _, p in pairs(Players:GetPlayers()) do
+                            if p.Name == targetUser then
+                                found = true
+                                break
+                            end
+                        end
+                        if found then
+                            while true do
+                                local stillExists = Players:FindFirstChild(targetUser)
+                                if not stillExists then
+                                    break
+                                end
+                                buyDungeonTicket()
+                                task.wait(delay)
+                                fireDungeonEvent({
+                                    {
+                                        {
+                                            ["Dungeon"] = fixedDungeonID,
+                                            ["Event"] = "DungeonAction",
+                                            ["Action"] = "Join"
+                                        },
+                                        "\n"
+                                    }
+                                })
+                                task.wait(1.5)
+                            end
+                            return
+                        end
+                    end
                     buyDungeonTicket()
                     task.wait(delay)
-
                     createDungeon()
                     task.wait(3)
-
                     if getgenv().UltimateDungeon then
                         addUltimateRune()
                         task.wait(delay)
                     end
-
                     startDungeon()
-
                     task.wait(1)
                     rejoinCooldown = false
                 end
