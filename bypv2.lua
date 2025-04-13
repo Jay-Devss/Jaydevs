@@ -136,7 +136,7 @@ local function runDungeonBypass()
         task.wait(delay)
 
         createDungeon()
-        task.wait(delay)
+        task.wait(3)
 
         if getgenv().UltimateDungeon then
             addUltimateRune()
@@ -201,7 +201,7 @@ local function autoRejoin()
                     task.wait(delay)
 
                     createDungeon()
-                    task.wait(delay)
+                    task.wait(3)
 
                     if getgenv().UltimateDungeon then
                         addUltimateRune()
