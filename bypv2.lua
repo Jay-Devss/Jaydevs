@@ -2,6 +2,8 @@ local jay = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/rel
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local dataRemoteEvent = ReplicatedStorage:WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent")
 local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
 getgenv().UltimateDungeon = getgenv().UltimateDungeon or false
 local fixedDungeonID = 7948501548
@@ -22,7 +24,7 @@ end
 local function isInDungeonGame()
     local gameName = nil
     local success, result = pcall(function()
-        return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+        return MarketplaceService:GetProductInfo(game.PlaceId).Name
     end)
 
     if success then
@@ -91,7 +93,7 @@ local function tryJoinCastle()
 
     if minute >= 45 and minute <= 59 then
         local success, result = pcall(function()
-            return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+            return MarketplaceService:GetProductInfo(game.PlaceId).Name
         end)
 
         if success then
@@ -151,4 +153,72 @@ local function runDungeonBypass()
     end
 end
 
+local function autoLeave()
+    task.spawn(function()
+        while getgenv().isAutoLeftActive do
+            pcall(function()
+                local playerGui = player:FindFirstChild("PlayerGui")
+                local hud = playerGui and playerGui:FindFirstChild("Hud")
+                local upContainer = hud and hud:FindFirstChild("UpContanier")
+                local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
+                if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 12s" then
+                    local vim = game:GetService("VirtualInputManager")
+                    vim:SendKeyEvent(true, "BackSlash", false, game)
+                    vim:SendKeyEvent(false, "BackSlash", false, game)
+                    task.wait(0.5)
+                    vim:SendKeyEvent(true, "Right", false, game)
+                    vim:SendKeyEvent(false, "Right", false, game)
+                    task.wait(0.5)
+                    vim:SendKeyEvent(true, "Return", false, game)
+                    vim:SendKeyEvent(false, "Return", false, game)
+                    task.wait(0.2)
+                    vim:SendKeyEvent(true, "Return", false, game)
+                    vim:SendKeyEvent(false, "Return", false, game)
+                    task.wait(0.2)
+                    vim:SendKeyEvent(true, "Return", false, game)
+                    vim:SendKeyEvent(false, "Return", false, game)
+                end
+            end)
+            task.wait(0.5)
+        end
+    end)
+end
+
+local function autoRejoin()
+    local rejoinCooldown = false
+
+    task.spawn(function()
+        while getgenv().isAutoRejoinActive do
+            pcall(function()
+                local playerGui = player:FindFirstChild("PlayerGui")
+                local hud = playerGui and playerGui:FindFirstChild("Hud")
+                local upContainer = hud and hud:FindFirstChild("UpContanier")
+                local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
+                if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 12s" and not rejoinCooldown then
+                    rejoinCooldown = true
+
+                    buyDungeonTicket()
+                    task.wait(delay)
+
+                    createDungeon()
+                    task.wait(delay)
+
+                    if getgenv().UltimateDungeon then
+                        addUltimateRune()
+                        task.wait(delay)
+                    end
+
+                    startDungeon()
+
+                    task.wait(1)
+                    rejoinCooldown = false
+                end
+            end)
+            task.wait(0.5)
+        end
+    end)
+end
+
 runDungeonBypass()
+autoLeave()
+autoRejoin()
