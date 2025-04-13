@@ -8,7 +8,6 @@ local currentTarget = nil
 local tween = nil
 local lastDeadNPC = nil
 local targetCFramePosition = nil
-getgenv().isAutoLeftActive = true
 
 local function FreezePlayer(state)
 	if character and character:FindFirstChild("Humanoid") then
@@ -148,35 +147,6 @@ task.spawn(function()
 			lastDeadNPC = nil
 		end
 		task.wait()
-	end
-end)
-
-task.spawn(function()
-	while getgenv().isAutoLeftActive do
-		pcall(function()
-			local playerGui = player:FindFirstChild("PlayerGui")
-			local hud = playerGui and playerGui:FindFirstChild("Hud")
-			local upContainer = hud and hud:FindFirstChild("UpContanier")
-			local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
-			if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 12s" then
-				local vim = game:GetService("VirtualInputManager")
-				vim:SendKeyEvent(true, "BackSlash", false, game)
-				vim:SendKeyEvent(false, "BackSlash", false, game)
-				task.wait(0.5)
-				vim:SendKeyEvent(true, "Right", false, game)
-				vim:SendKeyEvent(false, "Right", false, game)
-				task.wait(0.5)
-				vim:SendKeyEvent(true, "Return", false, game)
-				vim:SendKeyEvent(false, "Return", false, game)
-				task.wait(0.2)
-				vim:SendKeyEvent(true, "Return", false, game)
-				vim:SendKeyEvent(false, "Return", false, game)
-				task.wait(0.2)
-				vim:SendKeyEvent(true, "Return", false, game)
-				vim:SendKeyEvent(false, "Return", false, game)
-			end
-		end)
-		task.wait(0.5)
 	end
 end)
 
