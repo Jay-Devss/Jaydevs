@@ -213,7 +213,7 @@ local function autoRejoin()
                 local hud = playerGui and playerGui:FindFirstChild("Hud")
                 local upContainer = hud and hud:FindFirstChild("UpContanier")
                 local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
-                if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 12s" and not rejoinCooldown then
+                if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 20s" and not rejoinCooldown then
                     rejoinCooldown = true
                     if getgenv().autoJoinJay and player.Name ~= targetUser then
                         local found = false
