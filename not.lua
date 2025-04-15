@@ -55,7 +55,7 @@ function NotifyWebhook()
                         isDoubleDungeon = true
                     end
 
-                    if text == "Dungeon Ends in 12s" and not sent then
+                    if text == "Dungeon Ends in 20s" and not sent then
                         sent = true
                         local endTime = os.time()
                         local duration = os.difftime(endTime, startTime)
