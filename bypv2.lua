@@ -5,7 +5,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-getgenv().UltimateDungeon = getgenv().UltimateDungeon or false
+getgenv().UltimateDungeon = getgenv().UltimateDungeon or true
 local targetUser = "Jayalwayspaldooo7"
 local fixedDungeonID = 7948501548
 local delay = 0.5
