@@ -129,7 +129,6 @@ end
 local function KillAllNPCs()
     task.spawn(function()
         while kill do
-	GetAllLivingNPCs()
             if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
                 if currentTarget and IsNPCDead(currentTarget) then
                     lastDeadNPC = currentTarget
@@ -257,6 +256,7 @@ task.spawn(function()
 		if handleLeaveLogic() then
 		kill = false
 			else
+		GetAllLivingNPCs()
 		KillAllNPCs()
 		end
 		task.wait(1)
