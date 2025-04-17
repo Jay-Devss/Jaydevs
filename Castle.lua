@@ -6,7 +6,9 @@ local TweenService = game:GetService("TweenService")
 local VirtualUser = game:GetService("VirtualUser")
 local LivingNPCs = {}
 local currentTarget = nil
+local tween = nil
 local lastDeadNPC = nil
+local targetCFramePosition = nil
 local kill = true
 
 local function FreezePlayer(state)
@@ -17,6 +19,7 @@ local function FreezePlayer(state)
 end
 
 local function GetAllLivingNPCs()
+    print("GetAllLivingNPCs called")
     local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
     if not serverFolder then return end
     for _, npc in pairs(serverFolder:GetChildren()) do
@@ -37,25 +40,37 @@ local function GetNearbyPosition(npc)
     return npcPos + (direction * offsetDistance)
 end
 
-local function SafeInstantTeleport(npc)
-    if not npc or not npc:IsDescendantOf(workspace) then return end
-    local distance = (character:GetPivot().Position - npc.Position).Magnitude
-    if distance <= 25 then
-        character:PivotTo(CFrame.new(GetNearbyPosition(npc)))
+local function MoveToCFrame(npc)
+    print("MoveToCFrame called")
+    local targetPosition = GetNearbyPosition(npc)
+    targetCFramePosition = targetPosition
+    local targetCFrame = CFrame.new(targetPosition)
+    if getgenv().useTween then
+        if tween then tween:Cancel() end
+        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+        local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
+        tween = TweenService:Create(humanoidRootPart, TweenInfo.new(duration, Enum.EasingStyle.Linear), {CFrame = targetCFrame})
+        tween:Play()
     else
-        local direction = (npc.Position - character:GetPivot().Position).Unit
-        local jumps = math.ceil(distance / 50)
-        for i = 1, jumps do
-            local step = math.min(50, distance - (i - 1) * 50)
-            local newPosition = character:GetPivot().Position + direction * step
-            character:PivotTo(CFrame.new(newPosition))
-            task.wait(0.05)
+        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+        if distance <= 20 then
+            player.Character:PivotTo(targetCFrame)
+        else
+            if tween then tween:Cancel() end
+            local step = 15
+            local current = humanoidRootPart.Position
+            while (current - targetPosition).Magnitude > step do
+                current = current:Lerp(targetPosition, step / (current - targetPosition).Magnitude)
+                player.Character:PivotTo(CFrame.new(current))
+                task.wait(0.03)
+            end
+            player.Character:PivotTo(targetCFrame)
         end
-        character:PivotTo(CFrame.new(GetNearbyPosition(npc)))
     end
 end
 
 local function FirePunch(npcName)
+    print("FirePunch called on", npcName)
     game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
         { Event = "PunchAttack", Enemy = npcName }, "\4"
     })
@@ -80,6 +95,7 @@ local function IsNPCDead(npc)
 end
 
 local function autoLeave()
+    print("autoLeave called")
     local vim = game:GetService("VirtualInputManager")
     local function pressKey(key)
         vim:SendKeyEvent(true, key, false, game)
@@ -102,6 +118,7 @@ local function getCurrentCastleFloor()
     local room = upContainer and upContainer:FindFirstChild("Room")
     if room and room:IsA("TextLabel") then
         if not string.find(room.Text, "Floor") then
+            warn("Not in Castle. Script disabled.")
             getgenv().isActive = false
             return nil
         end
@@ -111,6 +128,9 @@ local function getCurrentCastleFloor()
 end
 
 local function KillAllNPCs()
+    print("KillAllNPCs started")
+    LivingNPCs = {}
+    GetAllLivingNPCs()
     task.spawn(function()
         while kill and getgenv().isActive do
             if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
@@ -118,19 +138,19 @@ local function KillAllNPCs()
                     lastDeadNPC = currentTarget
                 end
                 currentTarget = nil
-                GetAllLivingNPCs()
+                
                 for name, npc in pairs(LivingNPCs) do
                     if npc and not IsNPCDead(npc) then
                         currentTarget = npc
                         FirePunch(name)
-                        SafeInstantTeleport(npc)
+                        MoveToCFrame(npc)
                         break
                     end
                 end
             elseif currentTarget and not IsNPCDead(currentTarget) then
                 local distance = (humanoidRootPart.Position - currentTarget.Position).Magnitude
                 if distance > 10 then
-                    SafeInstantTeleport(currentTarget)
+                    MoveToCFrame(currentTarget)
                 end
             end
             task.wait()
@@ -138,7 +158,27 @@ local function KillAllNPCs()
     end)
 end
 
+local function killBossOnly()
+    print("killBossOnly called")
+    local server = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
+    if not server then return end
+    for _, npc in ipairs(server:GetChildren()) do
+        if npc:IsA("BasePart") and npc:GetAttribute("IsBoss") == true then
+            MoveToCFrame(npc)
+            while not IsNPCDead(npc) do
+                FirePunch(npc.Name)
+                task.wait()
+            end
+            FireAriseDestroy(npc.Name)
+            task.wait(1)
+            autoLeave()
+            break
+        end
+    end
+end
+
 local function killAllNPCsAndLeave()
+    print("killAllNPCsAndLeave called")
     LivingNPCs = {}
     GetAllLivingNPCs()
     task.spawn(function()
@@ -152,9 +192,13 @@ local function killAllNPCsAndLeave()
                     if npc and not IsNPCDead(npc) then
                         currentTarget = npc
                         FirePunch(name)
-                        task.wait(0.3)
-                        if currentTarget == npc then
-                            SafeInstantTeleport(npc)
+                        if getgenv().useTween then
+                            MoveToCFrame(npc)
+                        else
+                            task.wait(0.3)
+                            if currentTarget == npc then
+                                MoveToCFrame(npc)
+                            end
                         end
                         break
                     end
@@ -176,25 +220,8 @@ local function killAllNPCsAndLeave()
     end)
 end
 
-local function killBossOnly()
-    local server = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
-    if not server then return end
-    for _, npc in ipairs(server:GetChildren()) do
-        if npc:IsA("BasePart") and npc:GetAttribute("IsBoss") == true then
-            SafeInstantTeleport(npc)
-            while not IsNPCDead(npc) do
-                FirePunch(npc.Name)
-                task.wait()
-            end
-            FireAriseDestroy(npc.Name)
-            task.wait(1)
-            autoLeave()
-            break
-        end
-    end
-end
-
 local function handleLeaveLogic()
+    print("handleLeaveLogic called")
     local currentFloorText = getCurrentCastleFloor()
     local targetFloor = "Floor: " .. tostring(getgenv().FloorLevel) .. "/100"
     if currentFloorText and currentFloorText == targetFloor then
@@ -221,13 +248,13 @@ game:GetService("Players").LocalPlayer.Idled:Connect(function()
     VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 end)
 
+print("Script started")
 task.spawn(function()
     while getgenv().isActive do
+        print("Main loop running")
         if not handleLeaveLogic() then
-            if not kill then
-                kill = true
-                KillAllNPCs()
-            end
+            kill = true
+            KillAllNPCs()
         else
             kill = false
         end
