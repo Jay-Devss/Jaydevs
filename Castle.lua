@@ -80,14 +80,12 @@ end
 
 local function FireAriseDestroy(npcName)
     if not getgenv().autoAriseDestroy then return end
-    task.spawn(function()
         while currentTarget and currentTarget:IsDescendantOf(workspace) and not IsNPCDead(currentTarget) do
             game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
                 { Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture", Enemy = npcName },
                 "\4"
             })
-            task.wait(0.5)
-        end
+            task.wait(0.3)
     end)
 end
 
