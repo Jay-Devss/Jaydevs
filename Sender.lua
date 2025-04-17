@@ -12,7 +12,9 @@ local function BossSender()
         ["Ulquiorra"] = "https://static.wikia.nocookie.net/arise-crossoverrlbx/images/7/76/Murcielago.png/revision/latest?cb=20250408114942",
         ["Julius"] = "https://static.wikia.nocookie.net/arise-crossoverrlbx/images/1/1e/Timeking.png/revision/latest?cb=20250408115409",
         ["Denji"] = "https://static.wikia.nocookie.net/arise-crossoverrlbx/images/c/cc/Chainsaw.png/revision/latest?cb=20250408115528",
-        ["Pucci"] = "https://static.wikia.nocookie.net/arise-crossoverrlbx/images/1/15/Gucci.png/revision/latest?cb=20250408115642"
+        ["Pucci"] = "https://static.wikia.nocookie.net/arise-crossoverrlbx/images/1/15/Gucci.png/revision/latest?cb=20250408115642",
+        ["Esil"] = "https://i.ibb.co/Q3G2hrR4/ifoto-ai-1744878699366.png",
+        ["Freeza"] = "https://i.ibb.co/fVFqK1sF/ifoto-ai-1744878857777.png"
     }
 
     local function getCurrentCastleFloor()
