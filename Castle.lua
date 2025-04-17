@@ -105,9 +105,11 @@ local function getCurrentCastleFloor()
 end
 
 local function EnableAutoClicker()
-    local attr = player:FindFirstChild("AutoClicker")
-    if attr and attr.Value == false then
-        attr.Value = true
+    local autoClick = player:GetAttribute("AutoClick")
+    if autoClick == nil then
+        player:SetAttribute("AutoClick", true)
+    elseif autoClick == false then
+        player:SetAttribute("AutoClick", true)
     end
 end
 
