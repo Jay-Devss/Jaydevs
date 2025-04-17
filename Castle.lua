@@ -194,7 +194,7 @@ end
 
 local function handleLeaveLogic()
 	local currentFloorText = getCurrentCastleFloor()
-	local targetFloor = "Floor: " .. getgenv().FloorLevel .. "/100"
+	local targetFloor = "Floor: " .. tostring(getgenv().FloorLevel) .. "/100"
 	print("Target Floor: " .. targetFloor)
 
 	if currentFloorText and currentFloorText == targetFloor then
