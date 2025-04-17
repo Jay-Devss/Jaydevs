@@ -195,7 +195,7 @@ end
 local function handleLeaveLogic()
 	local currentFloorText = getCurrentCastleFloor()
 	local targetFloor = "Floor: " .. tostring(getgenv().FloorLevel) .. "/100"
-	print("Target Floor: " .. targetFloor)
+	print("Target Floor:" .. targetFloor)
 
 	if currentFloorText and currentFloorText == targetFloor then
 		if getgenv().LeaveMode == "KillBossOnly" then
