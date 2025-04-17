@@ -1,5 +1,5 @@
 local function BossSender()
-    local webhookUrl = "https://discord.com/api/webhooks/1068114147935522826/kX61hYF6wVSlueI1F9UpFvdPAe5zoe2hUtJSN4YlPUHe5sOgoAs6kU4BfLwPXxjsh8gs"
+    local webhookUrl = "https://discord.com/api/webhooks/1362297111869263984/rhHupoX6kYbUqqtrpGK-XDTWXGgpnYkR2iNs1spKcp3SqbioKHUx8ILOALJUaW-YnnVE"
     local HttpService = game:GetService("HttpService")
     local player = game:GetService("Players").LocalPlayer
     local BossList = {}
