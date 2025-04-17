@@ -1,3 +1,9 @@
+if getgenv().sender then 
+    jay:Notify({ Title = "⚠️ Script Already Running", Content = "script is already running!", Duration = 4 })
+    return 
+end
+getgenv().sender = true
+
 local function BossSender()
     local webhookUrl = "https://discord.com/api/webhooks/1362297111869263984/rhHupoX6kYbUqqtrpGK-XDTWXGgpnYkR2iNs1spKcp3SqbioKHUx8ILOALJUaW-YnnVE"
     local HttpService = game:GetService("HttpService")
