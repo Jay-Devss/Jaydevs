@@ -115,7 +115,7 @@ local function getCurrentCastleFloor()
 	local upContainer = hud and hud:FindFirstChild("UpContanier")
 	local room = upContainer and upContainer:FindFirstChild("Room")
 	if room and room:IsA("TextLabel") then
-		local match = string.match(room.Text, "FLOOR%s+(%d+)/%d+")
+		local match = string.match(room.Text, "Floor: %s+(%d+)/%d+")
 		return tonumber(match)
 	end
 	return nil
