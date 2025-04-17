@@ -11,6 +11,26 @@ local lastDeadNPC = nil
 local targetCFramePosition = nil
 local kill = true
 
+local function EnableAutoClick()
+    local autoClick = player:GetAttribute("AutoClick")
+    if autoClick == nil or autoClick == false then
+        player:SetAttribute("AutoClick", true)
+    end
+end
+
+local function FireAriseDestroy(npcName)
+    if not getgenv().autoAriseDestroy then return end
+    task.spawn(function()
+        for _ = 1, 3 do
+            game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+                { Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture", Enemy = npcName },
+                "\4"
+            })
+            task.wait(0.3)
+        end
+    end)
+end
+
 local function FreezePlayer(state)
     if character and character:FindFirstChild("Humanoid") then
         character.Humanoid.AutoRotate = not state
@@ -44,27 +64,16 @@ local function MoveToCFrame(npc)
     targetCFramePosition = targetPosition
     local targetCFrame = CFrame.new(targetPosition)
 
-    if getgenv().useTween then
-        if tween then tween:Cancel() end
-        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-        local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
-        tween = TweenService:Create(humanoidRootPart, TweenInfo.new(duration, Enum.EasingStyle.Linear), {CFrame = targetCFrame})
-        tween:Play()
+    local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+    if distance <= 15 then
+        player.Character:PivotTo(targetCFrame)
     else
-        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-        if distance <= 15 then
-            character:PivotTo(targetCFrame)
-        else
-            local direction = (targetPosition - humanoidRootPart.Position).Unit
-            local step = 15
-            local current = humanoidRootPart.Position
-            while (current - targetPosition).Magnitude > step do
-                current = current + direction * step
-                character:PivotTo(CFrame.new(current))
-                task.wait()
-            end
-            character:PivotTo(targetCFrame)
+        local step = (targetPosition - humanoidRootPart.Position).Unit * 15
+        while (humanoidRootPart.Position - targetPosition).Magnitude > 15 do
+            player.Character:PivotTo(CFrame.new(humanoidRootPart.Position + step))
+            task.wait(0.05)
         end
+        player.Character:PivotTo(targetCFrame)
     end
 end
 
@@ -104,23 +113,16 @@ local function getCurrentCastleFloor()
     return nil
 end
 
-local function EnableAutoClicker()
-    local autoClick = player:GetAttribute("AutoClick")
-    if autoClick == nil then
-        player:SetAttribute("AutoClick", true)
-    elseif autoClick == false then
-        player:SetAttribute("AutoClick", true)
-    end
-end
-
 local function KillAllNPCs()
     LivingNPCs = {}
     GetAllLivingNPCs()
+    EnableAutoClick()
 
     task.spawn(function()
         while kill and getgenv().isActive do
             if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
                 if currentTarget and IsNPCDead(currentTarget) then
+                    FireAriseDestroy(currentTarget.Name)
                     lastDeadNPC = currentTarget
                 end
                 currentTarget = nil
@@ -132,6 +134,11 @@ local function KillAllNPCs()
                         break
                     end
                 end
+            elseif currentTarget and not IsNPCDead(currentTarget) then
+                local distance = (humanoidRootPart.Position - currentTarget.Position).Magnitude
+                if distance > 10 then
+                    MoveToCFrame(currentTarget)
+                end
             end
             task.wait()
         end
@@ -141,11 +148,13 @@ end
 local function killAllNPCsAndLeave()
     LivingNPCs = {}
     GetAllLivingNPCs()
+    EnableAutoClick()
 
     task.spawn(function()
         while getgenv().isActive do
             if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
                 if currentTarget and IsNPCDead(currentTarget) then
+                    FireAriseDestroy(currentTarget.Name)
                     lastDeadNPC = currentTarget
                 end
                 currentTarget = nil
@@ -166,6 +175,7 @@ local function killAllNPCsAndLeave()
                     break
                 end
             end
+
             if allDead then
                 autoLeave()
                 break
@@ -186,6 +196,8 @@ local function killBossOnly()
             while not IsNPCDead(npc) do
                 task.wait()
             end
+            FireAriseDestroy(npc.Name)
+            task.wait(1)
             autoLeave()
             break
         end
@@ -203,6 +215,7 @@ local function handleLeaveLogic()
         elseif getgenv().LeaveMode == "LeaveDirectly" then
             autoLeave()
         end
+        kill = false
         return true
     end
     return false
@@ -224,11 +237,7 @@ task.spawn(function()
         if not handleLeaveLogic() then
             kill = true
             KillAllNPCs()
-        else
-            kill = false
         end
         task.wait(0.5)
     end
 end)
-
-EnableAutoClicker()
