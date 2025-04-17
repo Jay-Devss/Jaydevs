@@ -115,15 +115,16 @@ local function getCurrentCastleFloor()
 	local upContainer = hud and hud:FindFirstChild("UpContanier")
 	local room = upContainer and upContainer:FindFirstChild("Room")
 	if room and room:IsA("TextLabel") then
-		local match = string.match(room.Text, "Floor: %s+(%d+)/%d+")
-		return tonumber(match)
+		return room.Text
 	end
 	return nil
 end
 
 local function handleLeaveLogic()
-	local currentFloor = getCurrentCastleFloor()
-	if currentFloor and currentFloor >= getgenv().FloorLevel then
+	local currentFloorText = getCurrentCastleFloor()
+	local targetFloor = "Floor: " .. getgenv().FloorLevel .. "/100"
+
+	if currentFloorText and currentFloorText == targetFloor then
 		if getgenv().LeaveMode == "KillBossOnly" then
 			killBossOnly()
 		elseif getgenv().LeaveMode == "KillAll" then
