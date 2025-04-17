@@ -53,7 +53,7 @@ local function MoveToCFrame(npc)
     local targetCFrame = CFrame.new(targetPosition)
     local distance = (humanoidRootPart.Position - targetPosition).Magnitude
 
-    if distance <= 15 then
+    if distance <= 30 then
         player.Character:PivotTo(targetCFrame)
     else
         local steps = math.ceil(distance / 14)
