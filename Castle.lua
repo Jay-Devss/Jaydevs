@@ -149,24 +149,54 @@ end
 local function killAllNPCsAndLeave()
 	LivingNPCs = {}
 	GetAllLivingNPCs()
-	for name, npc in pairs(LivingNPCs) do
-		if npc and not IsNPCDead(npc) then
-			MoveToCFrame(npc)
-			repeat
-				FirePunch(npc.Name)
-				task.wait()
-			until IsNPCDead(npc)
-			FireAriseDestroy(npc.Name)
-			task.wait(0.5)
+
+	task.spawn(function()
+		while getgenv().isActive do
+			if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
+				if currentTarget and IsNPCDead(currentTarget) then
+					lastDeadNPC = currentTarget
+				end
+				currentTarget = nil
+
+				for name, npc in pairs(LivingNPCs) do
+					if npc and not IsNPCDead(npc) then
+						currentTarget = npc
+						FirePunch(name)
+						if getgenv().useTween then
+							MoveToCFrame(npc)
+						else
+							task.wait(0.3)
+							if currentTarget == npc then
+								MoveToCFrame(npc)
+							end
+						end
+						break
+					end
+				end
+			end
+
+			local allDead = true
+			for _, npc in pairs(LivingNPCs) do
+				if npc and not IsNPCDead(npc) then
+					allDead = false
+					break
+				end
+			end
+			if allDead then
+				autoLeave()
+				break
+			end
+
+			task.wait()
 		end
-	end
-	autoLeave()
+	end)
 end
 
 local function handleLeaveLogic()
 	local currentFloorText = getCurrentCastleFloor()
-	print(currentFloorText)
+	print("Current Floor: " .. currentFloorText)
 	local targetFloor = "Floor: " .. getgenv().FloorLevel .. "/100"
+	print("Target Floor: " .. targetFloor)
 
 	if currentFloorText and currentFloorText == targetFloor then
 		if getgenv().LeaveMode == "KillBossOnly" then
@@ -195,7 +225,9 @@ end)
 task.spawn(function()
 	while getgenv().isActive do
 		if handleLeaveLogic() then
-			
+			break
+			else
+			killAllNPCsAndLeave()
 		end
 		task.wait(1)
 	end
