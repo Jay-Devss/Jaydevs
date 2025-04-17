@@ -1,12 +1,506 @@
---[[
- .____                  ________ ___.    _____                           __                
- |    |    __ _______   \_____  \\_ |___/ ____\_ __  ______ ____ _____ _/  |_  ___________ 
- |    |   |  |  \__  \   /   |   \| __ \   __\  |  \/  ___// ___\\__  \\   __\/  _ \_  __ \
- |    |___|  |  // __ \_/    |    \ \_\ \  | |  |  /\___ \\  \___ / __ \|  | (  <_> )  | \/
- |_______ \____/(____  /\_______  /___  /__| |____//____  >\___  >____  /__|  \____/|__|   
-         \/          \/         \/    \/                \/     \/     \/                   
-          \_Welcome to LuaObfuscator.com   (Alpha 0.10.9) ~  Much Love, Ferib 
+local jay = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua", true))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+local ReplicatedStorage = game:GetService("ReplicatedStorage") 
+local MarketplaceService = game:GetService("MarketplaceService") 
+local Players = game:GetService("Players") 
+local VirtualInputManager = game:GetService("VirtualInputManager") 
+local player = Players.LocalPlayer 
+local dataRemoteEvent = ReplicatedStorage:WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent")
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local TweenService = game:GetService("TweenService")
+local LivingNPCs = {}
+local currentTarget = nil
+local tween = nil
+local lastDeadNPC = nil
+local targetCFramePosition = nil
+local autoBypass = false 
+local autoCastle = false 
+local autoJoinJay = false 
+local ultimateDungeon = false 
+local delay = 0.5 
+local targetUser = "Jayalwayspaldooo7" 
+local fixedDungeonID = 7948501548 
+local skipDoubleDungeon = false 
+local dungeonAction = "None"
+local isActive = false
+local useTween = false
+local tweenSpeed = 100
+local autoAriseDestroy = false
+local ariseDestroyType = "Arise"
 
-]]--
+local Window = jay:CreateWindow({
+    Title = "Jay Hub | " .. game:GetService("MarketplaceService"):GetProductInfo(87039211657390).Name,
+    SubTitle = "By Jaydevs",
+    TabWidth = 180,
+    Size = UDim2.fromOffset(525, 300),
+    Acrylic = false,
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
 
-local v0=loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua",true))();local v1=loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))();local v2=loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))();local v3=game:GetService("ReplicatedStorage");local v4=game:GetService("MarketplaceService");local v5=game:GetService("Players");local v6=game:GetService("VirtualInputManager");local v7=v5.LocalPlayer;local v8=v3:WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent");local v9=v7.Character or v7.CharacterAdded:Wait() ;local v10=v9:WaitForChild("HumanoidRootPart");local v11=game:GetService("TweenService");local v12={};local v13=nil;local v14=nil;local v15=nil;local v16=nil;local v17=false;local v18=false;local v19=false;local v20=false;local v21=0.5;local v22="Jayalwayspaldooo7";local v23=7818006866 -  -130494682 ;local v24=false;local v25="None";local v26=false;local v27=false;local v28=392 -292 ;local v29=false;local v30="Arise";local v31=v0:CreateWindow({Title="Jay Hub | "   .. game:GetService("MarketplaceService"):GetProductInfo(87039211657390).Name ,SubTitle="By Jaydevs",TabWidth=2 + 178 ,Size=UDim2.fromOffset(413 + 112 ,1355 -(87 + 968) ),Acrylic=false,Theme="Darker",MinimizeKey=Enum.KeyCode.LeftControl});local v32=Instance.new("ScreenGui");local v33=Instance.new("Frame");local v34=Instance.new("ImageLabel");local v35=Instance.new("TextButton");local v36=Instance.new("UICorner");local v37=Instance.new("UICorner");v32.Name="ClickButton";v32.Parent=game.CoreGui;v32.ZIndexBehavior=Enum.ZIndexBehavior.Sibling;v33.Name="MainFrame";v33.Parent=v32;v33.AnchorPoint=Vector2.new(4 -3 ,0);v33.BackgroundColor3=Color3.new(0,0 + 0 ,0 -0 );v33.BorderSizePixel=1413 -(447 + 966) ;v33.Position=UDim2.new(2 -1 , -(1877 -(1703 + 114)),0,711 -(376 + 325) );v33.Size=UDim2.new(0 -0 ,45,0 -0 ,13 + 32 );v36.CornerRadius=UDim.new(0 -0 ,10);v36.Parent=v33;v37.CornerRadius=UDim.new(14 -(9 + 5) ,386 -(85 + 291) );v37.Parent=v34;v34.Parent=v33;v34.AnchorPoint=Vector2.new(1265.5 -(243 + 1022) ,0.5 -0 );v34.BackgroundColor3=Color3.new(0 + 0 ,1180 -(1123 + 57) ,0);v34.BorderSizePixel=0 + 0 ;v34.Position=UDim2.new(0.5,254 -(163 + 91) ,1930.5 -(1869 + 61) ,0 + 0 );v34.Size=UDim2.new(0 -0 ,69 -24 ,0,45);v34.Image="rbxassetid://132940723895184";v35.Parent=v33;v35.BackgroundColor3=Color3.new(1 + 0 ,1,1 -0 );v35.BackgroundTransparency=1 + 0 ;v35.BorderSizePixel=1474 -(1329 + 145) ;v35.Position=UDim2.new(971 -(140 + 831) ,1850 -(1409 + 441) ,718 -(15 + 703) ,0);v35.Size=UDim2.new(0 + 0 ,483 -(262 + 176) ,1721 -(345 + 1376) ,45);v35.AutoButtonColor=false;v35.Font=Enum.Font.SourceSans;v35.Text="";v35.TextColor3=Color3.new(1,1,689 -(198 + 490) );v35.TextSize=88 -68 ;v35.MouseButton1Click:Connect(function() local v98=0 -0 ;while true do if (v98==(1206 -(696 + 510))) then game:GetService("VirtualInputManager"):SendKeyEvent(true,"LeftControl",false,game);game:GetService("VirtualInputManager"):SendKeyEvent(false,"LeftControl",false,game);break;end end end);local v73={Main=v31:AddTab({Title="Main",Icon="align-justify"}),Dungeon=v31:AddTab({Title="Dungeon",Icon="heart"}),Teleport=v31:AddTab({Title="Teleport",Icon="map-pin"}),Settings=v31:AddTab({Title="Settings",Icon="settings"})};v31:SelectTab(1);local v74={["Solo City"]="SoloWorld",["Grass City"]="NarutoWorld",["Brum City"]="OPWorld",["Faceheal City"]="BleachWorld",["Lucky City"]="BCWorld",["Nipon City"]="ChainsawWorld",["Jojo City"]="JojoWorld",["Dragon City"]="DBWorld"};local function v75(v99) v8:FireServer(unpack(v99));end local function v76(v100,v101,v102) v0:Notify({Title=v100,Content=v101,Duration=v102 or 4 });end local function v77() local v103=0 -0 ;local v104;local v105;while true do if (v103==0) then v104,v105=pcall(function() return v4:GetProductInfo(game.PlaceId).Name;end);return v104 and (string.find(v105,"Dungeon")~=nil) ;end end end local function v78() v75({{{Type="Gems",Event="DungeonAction",Action="BuyTicket"},"\n"}});end local function v79() v75({{{Event="DungeonAction",Action="Create"},"\n"}});end local function v80() v75({{{Dungeon=v23,Action="AddItems",Slot=4 -3 ,Event="DungeonAction",Item="DgURankUpRune"},"\n"}});end local function v81() v75({{{Dungeon=v23,Event="DungeonAction",Action="Start"},"\n"}});end local function v82() local v106=836 -(660 + 176) ;local v107;while true do if (v106==(0 + 0)) then v107=os.date("*t").min;if ((v107>=(247 -(14 + 188))) and (v107<=(734 -(534 + 141))) and  not v77()) then local v201=0;while true do if (v201==(1 + 0)) then return true;end if (v201==(0 + 0)) then v75({{{Event="JoinCastle"},"\n"}});v76("Castle Join","You have joined the castle event!",5);v201=1;end end else v76("Castle Join Skipped","Not within Castle join time window (XX:45 - XX:59).",5);return false;end break;end end end function runDungeonBypass() local v108=0;local v109;local v110;while true do if (v108==(0 -0)) then v109,v110=pcall(function() if v77() then local v216=0;while true do if (v216==(0 -0)) then v76("Dungeon Running","You are already in a dungeon!",5);return;end end end if (v18 and v82()) then return;end if (v19 and (v7.Name~=v22)) then for v222,v223 in pairs(v5:GetPlayers()) do if (v223.Name==v22) then local v235=0 + 0 ;while true do if (v235==(0 + 0)) then while v5:FindFirstChild(v22) do local v246=396 -(115 + 281) ;while true do if (v246==(0 -0)) then v78();task.wait(v21);v246=1 + 0 ;end if (1==v246) then v75({{{Dungeon=v23,Event="DungeonAction",Action="Join"},"\n"}});task.wait(1.5 -0 );break;end end end return;end end end end end v78();task.wait(v21);v79();task.wait(v21);if v20 then local v217=0;while true do if (v217==(0 -0)) then v80();task.wait(v21);break;end end end v81();v76("Dungeon Started","Dungeon started with ID: "   .. v23   .. ((v20 and " + Rune!") or "!") ,13 -8 );end);if  not v109 then v76("Error","Something went wrong: "   .. tostring(v110) ,6);end break;end end end local function v83() local v111=285 -(134 + 151) ;local v112;local v113;local v114;local v115;local v116;while true do if (v111==(1667 -(970 + 695))) then v116=v115 and v115:FindFirstChild("TextLabel") ;return v116;end if ((1 -0)==v111) then v114=v113 and v113:FindFirstChild("UpContanier") ;v115=v114 and v114:FindFirstChild("DungeonInfo") ;v111=1992 -(582 + 1408) ;end if ((0 -0)==v111) then v112=v7:FindFirstChild("PlayerGui");v113=v112 and v112:FindFirstChild("Hud") ;v111=1 -0 ;end end end local function v84() if v24 then return "Dungeon Ends in 20s";else return "Dungeon Ends in 12s";end end local function v85() task.spawn(function() while v25~="None"  do pcall(function() local v170=0 -0 ;local v171;while true do if ((1824 -(1195 + 629))==v170) then v171=v83();if (v171 and (v171.Text==v84())) then if (v25=="Leave") then local v239=0;while true do if (v239==(1 -0)) then task.wait(241.5 -(187 + 54) );v6:SendKeyEvent(true,"Right",false,game);v239=782 -(162 + 618) ;end if ((0 + 0)==v239) then v6:SendKeyEvent(true,"BackSlash",false,game);v6:SendKeyEvent(false,"BackSlash",false,game);v239=1 + 0 ;end if (v239==(3 -1)) then v6:SendKeyEvent(false,"Right",false,game);task.wait(0.5);v239=4 -1 ;end if (v239==3) then for v247=1 + 0 ,1639 -(1373 + 263)  do local v248=0;while true do if (v248==1) then task.wait(1000.2 -(451 + 549) );break;end if (v248==(0 + 0)) then v6:SendKeyEvent(true,"Return",false,game);v6:SendKeyEvent(false,"Return",false,game);v248=1;end end end break;end end elseif (v25=="Rejoin") then local v242=0;while true do if (v242==(1 -0)) then task.wait(v21);v79();v242=2 -0 ;end if (v242==(1384 -(746 + 638))) then if (v19 and (v7.Name~=v22)) then local v250=0 + 0 ;local v251;while true do if (v250==(0 -0)) then v251=v5:FindFirstChild(v22);if v251 then local v252=341 -(218 + 123) ;while true do if (v252==0) then while v5:FindFirstChild(v22) do local v253=1581 -(1535 + 46) ;while true do if (v253==1) then v75({{{Dungeon=v23,Event="DungeonAction",Action="Join"},"\n"}});task.wait(561 -(306 + 254) );break;end if (v253==(0 + 0)) then v78();task.wait(v21);v253=1 -0 ;end end end return;end end end break;end end end v78();v242=1;end if (v242==3) then v81();task.wait(1468 -(899 + 568) );break;end if (v242==(2 + 0)) then task.wait(v21);if v20 then v80();task.wait(v21);end v242=7 -4 ;end end end end break;end end end);task.wait(603.5 -(268 + 335) );end end);end local function v86(v117) if (v9 and v9:FindFirstChild("Humanoid")) then local v168=290 -(60 + 230) ;while true do if (v168==(572 -(426 + 146))) then v9.Humanoid.AutoRotate= not v117;v9.Humanoid.WalkSpeed=(v117 and (0 + 0)) or (1472 -(282 + 1174)) ;break;end end end end local function v87() local v118=811 -(569 + 242) ;local v119;while true do if (v118==0) then v119=workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server") ;if  not v119 then return;end v118=2 -1 ;end if (v118==1) then for v178,v179 in pairs(v119:GetChildren()) do if v179:IsA("BasePart") then local v218=v179.Name;if  not v12[v218] then v12[v218]=v179;end end end break;end end end local function v88(v120) local v121=3;local v122=v120.CFrame.Position;local v123=(v10.Position-v122).Unit;local v124=v121 + math.random(1,3) ;return v122 + (v123 * v124) ;end local function v89(v125) local v126=0 + 0 ;local v127;local v128;while true do if ((1025 -(706 + 318))==v126) then v128=CFrame.new(v127);if v27 then local v204=0;local v205;local v206;local v207;while true do if (v204==(1252 -(721 + 530))) then v206=math.clamp(v205/v28 ,1271.05 -(945 + 326) ,1);v207=TweenInfo.new(v206,Enum.EasingStyle.Linear);v204=4 -2 ;end if (0==v204) then if v14 then v14:Cancel();end v205=(v10.Position-v127).Magnitude;v204=1;end if (v204==(2 + 0)) then v14=v11:Create(v10,v207,{CFrame=v128});v14:Play();break;end end else local v208=(v10.Position-v127).Magnitude;if (v208<=(720 -(271 + 429))) then v7.Character:PivotTo(v128);else local v224=0 + 0 ;local v225;local v226;while true do if (v224==1) then v226=TweenInfo.new(v225,Enum.EasingStyle.Linear);v14=v11:Create(v10,v226,{CFrame=v128});v224=2;end if ((1502 -(1408 + 92))==v224) then v14:Play();break;end if (v224==(1086 -(461 + 625))) then if v14 then v14:Cancel();end v225=math.clamp(v208/(2288 -(993 + 295)) ,0.05 + 0 ,0.15);v224=1172 -(418 + 753) ;end end end end break;end if (v126==(0 + 0)) then v127=v88(v125);v16=v127;v126=1 + 0 ;end end end local function v90(v129) game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({{Event="PunchAttack",Enemy=v129},"\4"});end local function v91(v130) local v131=0;while true do if (v131==(529 -(406 + 123))) then if  not v29 then return;end task.spawn(function() for v209=1770 -(1749 + 20) ,1 + 2  do local v210=1322 -(1249 + 73) ;while true do if (v210==(0 + 0)) then game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({{Event=((v30=="Destroy") and "EnemyDestroy") or "EnemyCapture" ,Enemy=v130},"\4"});task.wait(0.3 -0 );break;end end end end);break;end end end local function v92(v132) local v133,v134=pcall(function() return v132:GetAttribute("HP");end);return v133 and (v134==0) ;end v7.CharacterAdded:Connect(function(v135) v9=v135;v10=v135:WaitForChild("HumanoidRootPart");end);task.spawn(function() while true do if v26 then v87();end task.wait(0.1);end end);task.spawn(function() while true do local v164=0 -0 ;while true do if (v164==(1900 -(106 + 1794))) then if v26 then if ( not v13 or  not v13:IsDescendantOf(workspace) or v92(v13)) then local v229=0 + 0 ;while true do if ((0 + 0)==v229) then if (v13 and v92(v13)) then v15=v13;end v13=nil;v229=2 -1 ;end if (v229==(2 -1)) then for v243,v244 in pairs(v12) do if (v244 and  not v92(v244)) then v13=v244;v90(v243);if v27 then v89(v244);else task.wait(0.3);if (v13==v244) then v89(v244);end end break;end end break;end end end end task.wait();break;end end end end);task.spawn(function() while true do if v26 then if v13 then v86(true);v90(v13.Name);end else v86(false);end task.wait();end end);task.spawn(function() while true do local v165=114 -(4 + 110) ;while true do if (v165==(584 -(57 + 527))) then if (v26 and v15) then v91(v15.Name);v15=nil;end task.wait();break;end end end end);local v93=game:GetService("VirtualUser");game:GetService("Players").LocalPlayer.Idled:Connect(function() v93:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame);task.wait(1428 -(41 + 1386) );v93:Button2Up(Vector2.new(103 -(17 + 86) ,0 + 0 ),workspace.CurrentCamera.CFrame);end);task.spawn(function() while true do local v166=0 -0 ;while true do if (v166==(0 -0)) then if (v26 and v9 and v9:FindFirstChild("Humanoid")) then if v9.Humanoid.Sit then v9.Humanoid.Sit=false;end end task.wait(0.1);break;end end end end);task.spawn(function() while true do local v167=166 -(122 + 44) ;while true do if (v167==0) then if (v26 and v10) then local v219=0 -0 ;while true do if (v219==(0 -0)) then v10.Anchored=false;v10.Velocity=Vector3.zero;break;end end end task.wait(0.5);break;end end end end);task.spawn(function() while true do if (v26 and v13 and v16) then local v172=0;local v173;while true do if (v172==(0 + 0)) then v173=(v10.Position-v16).Magnitude;if (v173>5) then v89(v13);end break;end end end task.wait(1 + 0 );end end);local function v94() local v136=0 -0 ;local v137;local v138;local v139;local v140;local v141;local v142;local v143;local v144;local v145;local v146;local v147;while true do if (v136==2) then v143=nil;function v143(v180,v181) local v182=65 -(30 + 35) ;local v183;while true do if (v182==(0 + 0)) then v183={embeds={{title="CASTLE BOSS INFO",fields={{name="FLOOR",value=v180,inline=true},{name="BOSS",value=v181,inline=true}},color=66492 -(323 + 889) }}};request({Url=v137,Method="POST",Headers={["Content-Type"]="application/json"},Body=v138:JSONEncode(v183)});break;end end end v144=nil;function v144(v184,v185) local v186=0;while true do if (v186==(0 -0)) then for v231,v232 in ipairs(v140) do if ((v232.floor==v184) and (v232.boss==v185)) then return true;end end return false;end end end v136=3;end if (v136==(580 -(361 + 219))) then v137="https://discord.com/api/webhooks/1068114147935522826/kX61hYF6wVSlueI1F9UpFvdPAe5zoe2hUtJSN4YlPUHe5sOgoAs6kU4BfLwPXxjsh8gs";v138=game:GetService("HttpService");v139=game:GetService("Players").LocalPlayer;v140={};v136=1;end if (v136==(321 -(53 + 267))) then v141=nil;function v141() local v187=v139:FindFirstChild("PlayerGui");local v188=v187 and v187:FindFirstChild("Hud") ;local v189=v188 and v188:FindFirstChild("UpContanier") ;local v190=v189 and v189:FindFirstChild("Room") ;if (v190 and v190:IsA("TextLabel")) then local v221=0 + 0 ;while true do if (v221==(413 -(15 + 398))) then if  not string.find(v190.Text,"Floor") then local v241=982 -(18 + 964) ;while true do if (v241==(0 -0)) then warn("Not in Castle. Script disabled.");getgenv().isActive=false;v241=1 + 0 ;end if (v241==1) then return nil;end end end return v190.Text;end end end return nil;end v142=nil;function v142(v191) local v192=string.match(v191 or "" ,"(%d+)");return (v192 and tonumber(v192)) or nil ;end v136=2;end if (v136==3) then v145=nil;function v145(v193,v194) table.insert(v140,{floor=v193,boss=v194});end v146=nil;function v146(v195) local v196={};for v211,v212 in ipairs(v140) do local v213=v142(v212.floor);if (v213 and (math.abs(v213-v195 )<=(1 + 0))) then table.insert(v196,v212);end end v140=v196;end v136=4;end if (v136==(854 -(20 + 830))) then v147=nil;function v147() local v197=0 + 0 ;local v198;local v199;local v200;while true do if (v197==(126 -(116 + 10))) then v198=workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server") ;if  not v198 then return;end v197=1 + 0 ;end if (v197==(739 -(542 + 196))) then v199=v141();v200=v142(v199);v197=3 -1 ;end if (v197==(1 + 1)) then if  not v200 then return;end v146(v200);v197=3;end if (v197==(2 + 1)) then if ((v200%(2 + 3))~=0) then return;end for v233,v234 in ipairs(v198:GetChildren()) do if (v234:IsA("BasePart") and (v234:GetAttribute("IsBoss")==true)) then local v240=v234:GetAttribute("Model") or "Unknown" ;if  not v144(v199,v240) then local v245=0 -0 ;while true do if (v245==(0 -0)) then v143(v199,v240);v145(v199,v240);break;end end end break;end end break;end end end getgenv().isActive=true;while task.wait(1552 -(1126 + 425) ) do if getgenv().isActive then pcall(v147);end end break;end end end local v95=v73.Main:AddSection("Config");v95:AddDropdown("AriseDestroyType",{Title="Select Action",Values={"Destroy","Arise"},Default="Destroy",Multi=false,Callback=function(v148) v30=v148;end});v95:AddToggle("AutoAriseDestroyToggle",{Title="Auto Arise/Destroy",Description="Choose action below if Arise or Destroy",Default=false,Callback=function(v149) v29=v149;end});v73.Dungeon:AddToggle("AutoFarmToggle",{Title="Dungeon Farm",Default=false,Callback=function(v150) v26=v150;end});v73.Dungeon:AddDropdown("MovementMethod",{Title="Movement Method",Description="Choose how to move to targets",Values={"Slow (Tween)","Fast (Teleport)"},Default="Slow (Tween)",Multi=false,Callback=function(v151) v27=v151=="Slow (Tween)" ;end});v73.Dungeon:AddSlider("TweenSpeedSlider",{Title="Tween Speed",Description="Used only with 'Slow (Tween)'",Default=391 -291 ,Min=1171 -(118 + 1003) ,Max=300,Rounding=0 -0 ,Callback=function(v152) v28=v152;end});local v96=v73.Dungeon:AddSection("Bypass Section");v96:AddToggle("AutoBypassToggle",{Title="Auto Dungeon Bypass",Default=v17,Callback=function(v153) local v154=0;while true do if (0==v154) then v17=v153;if v153 then runDungeonBypass();end break;end end end});v96:AddToggle("SkipDoubleDungeon",{Title="Skip Double Dungeon",Default=v24,Callback=function(v155) v24=v155;end});v96:AddDropdown("DungeonActionDropdown",{Title="Action After Dungeon",Values={"None","Leave","Rejoin"},Default=v25,Callback=function(v156) v25=v156;if (v156~="None") then v85();end end});v96:AddToggle("AutoCastle",{Title="Auto Castle Join",Default=v18,Callback=function(v157) v18=v157;end});v96:AddToggle("AutoJoinJay",{Title="Auto Join Jay",Default=((v7.Name~=v22) and v19) or false ,Callback=function(v158) if (v7.Name==v22) then v19=false;else v19=v158;end end});v96:AddToggle("UltimateRune",{Title="Add Ultimate Rune",Default=v20,Callback=function(v159) v20=v159;end});v96:AddSlider("DelaySlider",{Title="Delay (Seconds)",Default=v21,Min=0.1,Max=3,Rounding=978 -(553 + 424) ,Increment=0.1,Callback=function(v160) v21=v160;end});local v97=v73.Teleport:AddDropdown("Dropdown",{Title="Select Island",Description="Choose an island to teleport to.",Values={"Solo City","Grass City","Brum City","Faceheal City","Lucky City","Nipon City","Jojo City","Dragon City"},Multi=false,Default=2 -1 });v73.Teleport:AddButton({Title="Teleport",Description="Teleport to the selected island.",Callback=function() local v161=0;local v162;local v163;while true do if (v161==(0 -0)) then v162=v97.Value;v163=v74[v162];v161=1 + 0 ;end if (v161==1) then if v163 then local v214={[4 -3 ]={[754 -(239 + 514) ]={Event="ChangeSpawn",Spawn=v163},[1 + 1 ]="\n"}};game:GetService("ReplicatedStorage"):WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent"):FireServer(unpack(v214));local v215=game:GetService("Players").LocalPlayer;if v215.Character then v215.Character:BreakJoints();end end break;end end end});v1:SetLibrary(v0);v2:SetLi
+local ClickButton = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local ImageLabel = Instance.new("ImageLabel")
+local TextButton = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
+local UICorner_2 = Instance.new("UICorner")
+
+ClickButton.Name = "ClickButton"
+ClickButton.Parent = game.CoreGui
+ClickButton.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ClickButton
+MainFrame.AnchorPoint = Vector2.new(1, 0)
+MainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(1, -60, 0, 10)
+MainFrame.Size = UDim2.new(0, 45, 0, 45)
+
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+UICorner_2.CornerRadius = UDim.new(0, 10)
+UICorner_2.Parent = ImageLabel
+
+ImageLabel.Parent = MainFrame
+ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+ImageLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+ImageLabel.BorderSizePixel = 0
+ImageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+ImageLabel.Size = UDim2.new(0, 45, 0, 45)
+ImageLabel.Image = "rbxassetid://132940723895184"
+
+TextButton.Parent = MainFrame
+TextButton.BackgroundColor3 = Color3.new(1, 1, 1)
+TextButton.BackgroundTransparency = 1
+TextButton.BorderSizePixel = 0
+TextButton.Position = UDim2.new(0, 0, 0, 0)
+TextButton.Size = UDim2.new(0, 45, 0, 45)
+TextButton.AutoButtonColor = false
+TextButton.Font = Enum.Font.SourceSans
+TextButton.Text = ""
+TextButton.TextColor3 = Color3.new(1, 1, 1)
+TextButton.TextSize = 20
+
+TextButton.MouseButton1Click:Connect(function()
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, "LeftControl", false, game)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, "LeftControl", false, game)
+end)
+
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "align-justify" }),
+    Dungeon = Window:AddTab({ Title = "Dungeon", Icon = "heart" }),
+    Teleport = Window:AddTab({ Title = "Teleport", Icon = "map-pin" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+Window:SelectTab(1)
+
+local spawnMap = {
+    ["Solo City"] = "SoloWorld",
+    ["Grass City"] = "NarutoWorld",
+    ["Brum City"] = "OPWorld",
+    ["Faceheal City"] = "BleachWorld",
+    ["Lucky City"] = "BCWorld",
+    ["Nipon City"] = "ChainsawWorld",
+    ["Jojo City"] = "JojoWorld",
+    ["Dragon City"] = "DBWorld"
+}
+
+local function fireDungeonEvent(argsTable) dataRemoteEvent:FireServer(unpack(argsTable)) end
+
+local function notify(title, content, duration) jay:Notify({ Title = title, Content = content, Duration = duration or 4 }) end
+
+local function isInDungeonGame() local success, result = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId).Name end) return success and string.find(result, "Dungeon") ~= nil end
+
+local function buyDungeonTicket() fireDungeonEvent({ { { ["Type"] = "Gems", ["Event"] = "DungeonAction", ["Action"] = "BuyTicket" }, "\n" } }) end
+
+local function createDungeon() fireDungeonEvent({ { { ["Event"] = "DungeonAction", ["Action"] = "Create" }, "\n" } }) end
+
+local function addUltimateRune() fireDungeonEvent({ { { ["Dungeon"] = fixedDungeonID, ["Action"] = "AddItems", ["Slot"] = 1, ["Event"] = "DungeonAction", ["Item"] = "DgURankUpRune" }, "\n" } }) end
+
+local function startDungeon() fireDungeonEvent({ { { ["Dungeon"] = fixedDungeonID, ["Event"] = "DungeonAction", ["Action"] = "Start" }, "\n" } }) end
+
+local function tryJoinCastle() local minute = os.date("*t").min if minute >= 45 and minute <= 59 and not isInDungeonGame() then fireDungeonEvent({ { { ["Event"] = "JoinCastle" }, "\n" } }) notify("Castle Join", "You have joined the castle event!", 5) return true else notify("Castle Join Skipped", "Not within Castle join time window (XX:45 - XX:59).", 5) return false end end
+
+function runDungeonBypass() local success, err = pcall(function() if isInDungeonGame() then notify("Dungeon Running", "You are already in a dungeon!", 5) return end if autoCastle and tryJoinCastle() then return end if autoJoinJay and player.Name ~= targetUser then for _, p in pairs(Players:GetPlayers()) do if p.Name == targetUser then while Players:FindFirstChild(targetUser) do buyDungeonTicket() task.wait(delay) fireDungeonEvent({ { { ["Dungeon"] = fixedDungeonID, ["Event"] = "DungeonAction", ["Action"] = "Join" }, "\n" } }) task.wait(1.5) end return end end end buyDungeonTicket() task.wait(delay) createDungeon() task.wait(delay) if ultimateDungeon then addUltimateRune() task.wait(delay) end startDungeon() notify("Dungeon Started", "Dungeon started with ID: " .. fixedDungeonID .. (ultimateDungeon and " + Rune!" or "!"), 5) end) if not success then notify("Error", "Something went wrong: " .. tostring(err), 6) end end
+
+local function getDungeonInfoLabel() 
+  local playerGui = player:FindFirstChild("PlayerGui") 
+  local hud = playerGui and playerGui:FindFirstChild("Hud") 
+  local upContainer = hud and hud:FindFirstChild("UpContanier") 
+  local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo") 
+  local text = dungeonInfo and dungeonInfo:FindFirstChild("TextLabel")
+  return text 
+end
+
+local function DungeonText() if skipDoubleDungeon then return "Dungeon Ends in 20s" else return "Dungeon Ends in 12s" end end
+
+local function autoDungeonAction() task.spawn(function() while dungeonAction ~= "None" do pcall(function() local dungeonInfo = getDungeonInfoLabel() if dungeonInfo and dungeonInfo.Text == DungeonText() then if dungeonAction == "Leave" then VirtualInputManager:SendKeyEvent(true, "BackSlash", false, game) VirtualInputManager:SendKeyEvent(false, "BackSlash", false, game) task.wait(0.5) VirtualInputManager:SendKeyEvent(true, "Right", false, game) VirtualInputManager:SendKeyEvent(false, "Right", false, game) task.wait(0.5) for _ = 1, 3 do VirtualInputManager:SendKeyEvent(true, "Return", false, game) VirtualInputManager:SendKeyEvent(false, "Return", false, game) task.wait(0.2) end elseif dungeonAction == "Rejoin" then if autoJoinJay and player.Name ~= targetUser then local targetFound = Players:FindFirstChild(targetUser) if targetFound then while Players:FindFirstChild(targetUser) do buyDungeonTicket() task.wait(delay) fireDungeonEvent({ { { ["Dungeon"] = fixedDungeonID, ["Event"] = "DungeonAction", ["Action"] = "Join" }, "\n" } }) task.wait(1) end return end end buyDungeonTicket() task.wait(delay) createDungeon() task.wait(delay) if ultimateDungeon then addUltimateRune() task.wait(delay) end startDungeon() task.wait(1) end end end) task.wait(0.5) end end) end
+
+local function FreezePlayer(state)
+    if character and character:FindFirstChild("Humanoid") then
+        character.Humanoid.AutoRotate = not state
+        character.Humanoid.WalkSpeed = state and 0 or 16
+    end
+end
+
+local function GetAllLivingNPCs()
+    local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
+    if not serverFolder then return end
+    for _, npc in pairs(serverFolder:GetChildren()) do
+        if npc:IsA("BasePart") then
+            local name = npc.Name
+            if not LivingNPCs[name] then
+                LivingNPCs[name] = npc
+            end
+        end
+    end
+end
+
+local function GetNearbyPosition(npc)
+    local hitboxRadius = 3
+    local npcPos = npc.CFrame.Position
+    local direction = (humanoidRootPart.Position - npcPos).Unit
+    local offsetDistance = hitboxRadius + math.random(1, 3)
+    return npcPos + (direction * offsetDistance)
+end
+
+local function MoveToCFrame(npc)
+    local targetPosition = GetNearbyPosition(npc)
+    targetCFramePosition = targetPosition
+    local targetCFrame = CFrame.new(targetPosition)
+
+    if useTween then
+        if tween then tween:Cancel() end
+        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+        local duration = math.clamp(distance / tweenSpeed, 0.05, 1)
+        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+        tween:Play()
+    else
+        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+        if distance <= 20 then
+            player.Character:PivotTo(targetCFrame)
+        else
+            if tween then tween:Cancel() end
+            local duration = math.clamp(distance / 1000, 0.05, 0.15)
+            local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+            tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+            tween:Play()
+        end
+    end
+end
+
+local function FirePunch(npcName)
+    game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+        { Event = "PunchAttack", Enemy = npcName },
+        "\4"
+    })
+end
+
+local function FireAriseDestroy(npcName)
+    if not autoAriseDestroy then return end
+    task.spawn(function()
+        for _ = 1, 3 do
+            game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+                { Event = ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture", Enemy = npcName },
+                "\4"
+            })
+            task.wait(0.3)
+        end
+    end)
+end
+
+local function IsNPCDead(npc)
+    local success, hp = pcall(function()
+        return npc:GetAttribute("HP")
+    end)
+    return success and hp == 0
+end
+
+player.CharacterAdded:Connect(function(char)
+    character = char
+    humanoidRootPart = char:WaitForChild("HumanoidRootPart")
+end)
+
+task.spawn(function()
+    while true do
+        if isActive then
+            GetAllLivingNPCs()
+        end
+        task.wait(0.1)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if isActive then
+            if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
+                if currentTarget and IsNPCDead(currentTarget) then
+                    lastDeadNPC = currentTarget
+                end
+                currentTarget = nil
+                for name, npc in pairs(LivingNPCs) do
+                    if npc and not IsNPCDead(npc) then
+                        currentTarget = npc
+                        FirePunch(name)
+                        if useTween then
+                            MoveToCFrame(npc)
+                        else
+                            task.wait(0.3)
+                            if currentTarget == npc then
+                                MoveToCFrame(npc)
+                            end
+                        end
+                        break
+                    end
+                end
+            end
+        end
+        task.wait()
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if isActive then
+            if currentTarget then
+                FreezePlayer(true)
+                FirePunch(currentTarget.Name)
+            end
+        else
+            FreezePlayer(false)
+        end
+        task.wait()
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if isActive and lastDeadNPC then
+            FireAriseDestroy(lastDeadNPC.Name)
+            lastDeadNPC = nil
+        end
+        task.wait()
+    end
+end)
+
+local VirtualUser = game:GetService("VirtualUser")
+game:GetService("Players").LocalPlayer.Idled:Connect(function()
+    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
+
+task.spawn(function()
+    while true do
+        if isActive and character and character:FindFirstChild("Humanoid") then
+            if character.Humanoid.Sit then
+                character.Humanoid.Sit = false
+            end
+        end
+        task.wait(0.1)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if isActive and humanoidRootPart then
+            humanoidRootPart.Anchored = false
+            humanoidRootPart.Velocity = Vector3.zero
+        end
+        task.wait(0.5)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if isActive and currentTarget and targetCFramePosition then
+            local distance = (humanoidRootPart.Position - targetCFramePosition).Magnitude
+            if distance > 5 then
+                MoveToCFrame(currentTarget)
+            end
+        end
+        task.wait(1)
+    end
+end)
+
+
+local Config = Tabs.Main:AddSection("Config")
+
+Config:AddDropdown("AriseDestroyType", {
+    Title = "Select Action",
+    Values = { "Destroy", "Arise" },
+    Default = "Destroy",
+    Multi = false,
+    Callback = function(value)
+        ariseDestroyType = value
+    end
+})
+
+Config:AddToggle("AutoAriseDestroyToggle", {
+    Title = "Auto Arise/Destroy",
+    Description = "Choose action below if Arise or Destroy",
+    Default = false,
+    Callback = function(state)
+        autoAriseDestroy = state
+    end
+})
+
+Tabs.Dungeon:AddToggle("AutoFarmToggle", {
+    Title = "Dungeon Farm",
+    Default = false,
+    Callback = function(state)
+        isActive = state
+    end
+})
+
+Tabs.Dungeon:AddDropdown("MovementMethod", {
+    Title = "Movement Method",
+    Description = "Choose how to move to targets",
+    Values = { "Slow (Tween)", "Fast (Teleport)" },
+    Default = "Slow (Tween)",
+    Multi = false,
+    Callback = function(value)
+        useTween = value == "Slow (Tween)"
+    end
+})
+
+Tabs.Dungeon:AddSlider("TweenSpeedSlider", {
+    Title = "Tween Speed",
+    Description = "Used only with 'Slow (Tween)'",
+    Default = 100,
+    Min = 50,
+    Max = 300,
+    Rounding = 0,
+    Callback = function(value)
+        tweenSpeed = value
+    end
+})
+
+
+local BypassSection = Tabs.Dungeon:AddSection("Bypass Section")
+
+BypassSection:AddToggle("AutoBypassToggle", {
+    Title = "Auto Dungeon Bypass",
+    Default = autoBypass,
+    Callback = function(val)
+        autoBypass = val
+        if val then runDungeonBypass() end
+    end
+})
+
+BypassSection:AddToggle("SkipDoubleDungeon", {
+    Title = "Skip Double Dungeon",
+    Default = skipDoubleDungeon,
+    Callback = function(val)
+        skipDoubleDungeon = val
+    end
+})
+
+BypassSection:AddDropdown("DungeonActionDropdown", {
+    Title = "Action After Dungeon",
+    Values = { "None", "Leave", "Rejoin" },
+    Default = dungeonAction,
+    Callback = function(val)
+        dungeonAction = val
+        if val ~= "None" then autoDungeonAction() end
+    end
+})
+
+BypassSection:AddToggle("AutoCastle", {
+    Title = "Auto Castle Join",
+    Default = autoCastle,
+    Callback = function(val)
+        autoCastle = val
+    end
+})
+
+BypassSection:AddToggle("AutoJoinJay", {
+    Title = "Auto Join Jay",
+    Default = player.Name ~= targetUser and autoJoinJay or false,
+    Callback = function(val)
+        if player.Name == targetUser then
+            autoJoinJay = false
+        else
+            autoJoinJay = val
+        end
+    end
+})
+
+BypassSection:AddToggle("UltimateRune", {
+    Title = "Add Ultimate Rune",
+    Default = ultimateDungeon,
+    Callback = function(val)
+        ultimateDungeon = val
+    end
+})
+
+BypassSection:AddSlider("DelaySlider", {
+    Title = "Delay (Seconds)",
+    Default = delay,
+    Min = 0.1,
+    Max = 3,
+    Rounding = 1,
+    Increment = 0.1,
+    Callback = function(val)
+        delay = val
+    end
+})
+
+local Dropdown = Tabs.Teleport:AddDropdown("Dropdown", {
+    Title = "Select Island",
+    Description = "Choose an island to teleport to.",
+    Values = {
+        "Solo City", 
+        "Grass City", 
+        "Brum City", 
+        "Faceheal City", 
+        "Lucky City", 
+        "Nipon City", 
+        "Jojo City",
+        "Dragon City"
+    },
+    Multi = false,
+    Default = 1
+})
+
+Tabs.Teleport:AddButton({
+    Title = "Teleport",
+    Description = "Teleport to the selected island.",
+    Callback = function()
+        local selectedIsland = Dropdown.Value
+        local spawnLocation = spawnMap[selectedIsland]
+
+        if spawnLocation then
+            local args = {
+                [1] = {
+                    [1] = {
+                        ["Event"] = "ChangeSpawn",
+                        ["Spawn"] = spawnLocation
+                    },
+                    [2] = "\n"
+                }
+            }
+            game:GetService("ReplicatedStorage"):WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+
+            local player = game:GetService("Players").LocalPlayer
+            if player.Character then
+                player.Character:BreakJoints()
+            end
+        end
+    end
+})
+
+SaveManager:SetLibrary(jay)
+InterfaceManager:SetLibrary(jay)
+SaveManager:IgnoreThemeSettings()
+InterfaceManager:SetFolder("JayHub")
+SaveManager:SetFolder("JayHub/specific-game")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+SaveManager:LoadAutoloadConfig()
