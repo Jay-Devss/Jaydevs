@@ -109,6 +109,33 @@ local function autoLeave()
 	vim:SendKeyEvent(false, "Return", false, game)
 end
 
+local function getCurrentCastleFloor()
+	local gui = player:FindFirstChild("PlayerGui")
+	local hud = gui and gui:FindFirstChild("Hud")
+	local upContainer = hud and hud:FindFirstChild("UpContanier")
+	local room = upContainer and upContainer:FindFirstChild("Room")
+	if room and room:IsA("TextLabel") then
+		local match = string.match(room.Text, "FLOOR%s+(%d+)/%d+")
+		return tonumber(match)
+	end
+	return nil
+end
+
+local function handleLeaveLogic()
+	local currentFloor = getCurrentCastleFloor()
+	if currentFloor and currentFloor >= getgenv().FloorLevel then
+		if getgenv().LeaveMode == "KillBossOnly" then
+			killBossOnly()
+		elseif getgenv().LeaveMode == "KillAll" then
+			killAllNPCsAndLeave()
+		elseif getgenv().LeaveMode == "LeaveDirectly" then
+			autoLeave()
+		end
+		return true
+	end
+	return false
+end
+
 local function killBossOnly()
 	local server = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
 	if not server then return end
@@ -127,6 +154,23 @@ local function killBossOnly()
 	end
 end
 
+local function killAllNPCsAndLeave()
+	LivingNPCs = {}
+	GetAllLivingNPCs()
+	for name, npc in pairs(LivingNPCs) do
+		if npc and not IsNPCDead(npc) then
+			MoveToCFrame(npc)
+			repeat
+				FirePunch(npc.Name)
+				task.wait()
+			until IsNPCDead(npc)
+			FireAriseDestroy(npc.Name)
+			task.wait(0.5)
+		end
+	end
+	autoLeave()
+end
+
 player.CharacterAdded:Connect(function(char)
 	character = char
 	humanoidRootPart = char:WaitForChild("HumanoidRootPart")
@@ -140,94 +184,9 @@ end)
 
 task.spawn(function()
 	while getgenv().isActive do
-		if character and character:FindFirstChild("Humanoid") then
-			if character.Humanoid.Sit then
-				character.Humanoid.Sit = false
-			end
+		if handleLeaveLogic() then
+			break
 		end
-		task.wait(0.1)
-	end
-end)
-
-task.spawn(function()
-	while getgenv().isActive do
-		if humanoidRootPart then
-			humanoidRootPart.Anchored = false
-			humanoidRootPart.Velocity = Vector3.zero
-		end
-		task.wait(0.5)
-	end
-end)
-
-task.spawn(function()
-	while getgenv().isActive do
-		pcall(function()
-			if currentTarget and targetCFramePosition then
-				local distance = (humanoidRootPart.Position - targetCFramePosition).Magnitude
-				if distance > 5 then
-					MoveToCFrame(currentTarget)
-				end
-			end
-		end)
 		task.wait(1)
 	end
 end)
-
-if getgenv().castleMode == "KillBossOnly" then
-	task.spawn(killBossOnly)
-elseif getgenv().castleMode == "KillAll" then
-	task.spawn(function()
-		while getgenv().isActive do
-			GetAllLivingNPCs()
-			task.wait(0.1)
-		end
-	end)
-
-	task.spawn(function()
-		while getgenv().isActive do
-			if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
-				if currentTarget and IsNPCDead(currentTarget) then
-					lastDeadNPC = currentTarget
-				end
-				currentTarget = nil
-				for name, npc in pairs(LivingNPCs) do
-					if npc and not IsNPCDead(npc) then
-						currentTarget = npc
-						FirePunch(name)
-						if getgenv().useTween then
-							MoveToCFrame(npc)
-						else
-							task.wait(0.3)
-							if currentTarget == npc then
-								MoveToCFrame(npc)
-							end
-						end
-						break
-					end
-				end
-			end
-			task.wait()
-		end
-	end)
-
-	task.spawn(function()
-		while getgenv().isActive do
-			if currentTarget then
-				FreezePlayer(true)
-				FirePunch(currentTarget.Name)
-			end
-			task.wait()
-		end
-		FreezePlayer(false)
-	end)
-
-	task.spawn(function()
-		while getgenv().isActive do
-			if lastDeadNPC then
-				FireAriseDestroy(lastDeadNPC.Name)
-				lastDeadNPC = nil
-			end
-			task.wait()
-		end
-	end)
-end
