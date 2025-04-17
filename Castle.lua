@@ -115,6 +115,11 @@ local function getCurrentCastleFloor()
 	local upContainer = hud and hud:FindFirstChild("UpContanier")
 	local room = upContainer and upContainer:FindFirstChild("Room")
 	if room and room:IsA("TextLabel") then
+		if not string.find(room.Text, "Floor") then
+			warn("Not in Castle. Script disabled.")
+			getgenv().isActive = false
+			return nil
+		end
 		return room.Text
 	end
 	return nil
