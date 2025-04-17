@@ -125,6 +125,27 @@ local function getCurrentCastleFloor()
 	return nil
 end
 
+local function killBossOnly()
+	local server = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
+	if not server then return end
+
+	for _, npc in ipairs(server:GetChildren()) do
+		if npc:IsA("BasePart") and npc:GetAttribute("isBoss") == true then
+			MoveToCFrame(npc)
+
+			while not IsNPCDead(npc) do
+				FirePunch(npc.Name)
+				task.wait()
+			end
+
+			FireAriseDestroy(npc.Name)
+			task.wait(1)
+			autoLeave()
+			break
+		end
+	end
+end
+
 local function killAllNPCsAndLeave()
 	LivingNPCs = {}
 	GetAllLivingNPCs()
