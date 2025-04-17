@@ -9,6 +9,7 @@ local currentTarget = nil
 local tween = nil
 local lastDeadNPC = nil
 local targetCFramePosition = nil
+local kill = true
 
 local function FreezePlayer(state)
 	if character and character:FindFirstChild("Humanoid") then
@@ -125,6 +126,36 @@ local function getCurrentCastleFloor()
 	return nil
 end
 
+local function KillAllNPCs()
+    task.spawn(function()
+        while kill do
+            if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
+                if currentTarget and IsNPCDead(currentTarget) then
+                    lastDeadNPC = currentTarget
+                end
+                currentTarget = nil
+
+                for name, npc in pairs(LivingNPCs) do
+                    if npc and not IsNPCDead(npc) then
+                        currentTarget = npc
+                        FirePunch(name)
+                        if getgenv().useTween then
+                            MoveToCFrame(npc)
+                        else
+                            task.wait(0.3)
+                            if currentTarget == npc then
+                                MoveToCFrame(npc)
+                            end
+                        end
+                        break
+                    end
+                end
+            end
+            task.wait()
+        end
+    end)
+end
+
 local function killBossOnly()
 	local server = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
 	if not server then return end
@@ -224,9 +255,9 @@ end)
 task.spawn(function()
 	while getgenv().isActive do
 		if handleLeaveLogic() then
-			break
+		kill = false
 			else
-			killAllNPCsAndLeave()
+			KillAllNPCs()
 		end
 		task.wait(1)
 	end
