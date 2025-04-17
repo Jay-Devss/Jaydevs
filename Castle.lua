@@ -259,6 +259,6 @@ task.spawn(function()
 		GetAllLivingNPCs()
 		KillAllNPCs()
 		end
-		task.wait(1)
+		task.wait(0.5)
 	end
 end)
