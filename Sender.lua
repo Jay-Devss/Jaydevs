@@ -1,3 +1,4 @@
+local jay = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua", true))()
 if getgenv().sender then 
     jay:Notify({ Title = "⚠️ Script Already Running", Content = "script is already running!", Duration = 4 })
     return 
