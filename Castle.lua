@@ -6,9 +6,7 @@ local TweenService = game:GetService("TweenService")
 local VirtualUser = game:GetService("VirtualUser")
 local LivingNPCs = {}
 local currentTarget = nil
-local tween = nil
 local lastDeadNPC = nil
-local targetCFramePosition = nil
 local kill = true
 
 local function FreezePlayer(state)
@@ -39,27 +37,21 @@ local function GetNearbyPosition(npc)
     return npcPos + (direction * offsetDistance)
 end
 
-local function MoveToCFrame(npc)
-    local targetPosition = GetNearbyPosition(npc)
-    targetCFramePosition = targetPosition
-    local targetCFrame = CFrame.new(targetPosition)
-
-    if getgenv().useTween then
-        if tween then tween:Cancel() end
-        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-        local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
-        tween = TweenService:Create(humanoidRootPart, TweenInfo.new(duration, Enum.EasingStyle.Linear), {CFrame = targetCFrame})
-        tween:Play()
+local function SafeInstantTeleport(npc)
+    if not npc or not npc:IsDescendantOf(workspace) then return end
+    local distance = (character:GetPivot().Position - npc.Position).Magnitude
+    if distance <= 25 then
+        character:PivotTo(CFrame.new(GetNearbyPosition(npc)))
     else
-        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-        if distance <= 20 then
-            player.Character:PivotTo(targetCFrame)
-        else
-            if tween then tween:Cancel() end
-            local duration = math.clamp(distance / 1000, 0.05, 0.15)
-            tween = TweenService:Create(humanoidRootPart, TweenInfo.new(duration, Enum.EasingStyle.Linear), {CFrame = targetCFrame})
-            tween:Play()
+        local direction = (npc.Position - character:GetPivot().Position).Unit
+        local jumps = math.ceil(distance / 50)
+        for i = 1, jumps do
+            local step = math.min(50, distance - (i - 1) * 50)
+            local newPosition = character:GetPivot().Position + direction * step
+            character:PivotTo(CFrame.new(newPosition))
+            task.wait(0.05)
         end
+        character:PivotTo(CFrame.new(GetNearbyPosition(npc)))
     end
 end
 
@@ -110,7 +102,6 @@ local function getCurrentCastleFloor()
     local room = upContainer and upContainer:FindFirstChild("Room")
     if room and room:IsA("TextLabel") then
         if not string.find(room.Text, "Floor") then
-            warn("Not in Castle. Script disabled.")
             getgenv().isActive = false
             return nil
         end
@@ -127,23 +118,58 @@ local function KillAllNPCs()
                     lastDeadNPC = currentTarget
                 end
                 currentTarget = nil
-
-                GetAllLivingNPCs() -- Refresh list constantly
-
+                GetAllLivingNPCs()
                 for name, npc in pairs(LivingNPCs) do
                     if npc and not IsNPCDead(npc) then
                         currentTarget = npc
                         FirePunch(name)
-                        MoveToCFrame(npc)
+                        SafeInstantTeleport(npc)
                         break
                     end
                 end
             elseif currentTarget and not IsNPCDead(currentTarget) then
-                -- Re-check position in case stuck
                 local distance = (humanoidRootPart.Position - currentTarget.Position).Magnitude
                 if distance > 10 then
-                    MoveToCFrame(currentTarget)
+                    SafeInstantTeleport(currentTarget)
                 end
+            end
+            task.wait()
+        end
+    end)
+end
+
+local function killAllNPCsAndLeave()
+    LivingNPCs = {}
+    GetAllLivingNPCs()
+    task.spawn(function()
+        while getgenv().isActive do
+            if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
+                if currentTarget and IsNPCDead(currentTarget) then
+                    lastDeadNPC = currentTarget
+                end
+                currentTarget = nil
+                for name, npc in pairs(LivingNPCs) do
+                    if npc and not IsNPCDead(npc) then
+                        currentTarget = npc
+                        FirePunch(name)
+                        task.wait(0.3)
+                        if currentTarget == npc then
+                            SafeInstantTeleport(npc)
+                        end
+                        break
+                    end
+                end
+            end
+            local allDead = true
+            for _, npc in pairs(LivingNPCs) do
+                if npc and not IsNPCDead(npc) then
+                    allDead = false
+                    break
+                end
+            end
+            if allDead then
+                autoLeave()
+                break
             end
             task.wait()
         end
@@ -153,10 +179,9 @@ end
 local function killBossOnly()
     local server = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
     if not server then return end
-
     for _, npc in ipairs(server:GetChildren()) do
         if npc:IsA("BasePart") and npc:GetAttribute("IsBoss") == true then
-            MoveToCFrame(npc)
+            SafeInstantTeleport(npc)
             while not IsNPCDead(npc) do
                 FirePunch(npc.Name)
                 task.wait()
@@ -176,8 +201,7 @@ local function handleLeaveLogic()
         if getgenv().LeaveMode == "KillBossOnly" then
             killBossOnly()
         elseif getgenv().LeaveMode == "KillAll" then
-            kill = true
-            KillAllNPCs()
+            killAllNPCsAndLeave()
         elseif getgenv().LeaveMode == "LeaveDirectly" then
             autoLeave()
         end
@@ -200,8 +224,10 @@ end)
 task.spawn(function()
     while getgenv().isActive do
         if not handleLeaveLogic() then
-            kill = true
-            KillAllNPCs()
+            if not kill then
+                kill = true
+                KillAllNPCs()
+            end
         else
             kill = false
         end
