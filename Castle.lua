@@ -195,7 +195,7 @@ end)
 task.spawn(function()
 	while getgenv().isActive do
 		if handleLeaveLogic() then
-			break
+			
 		end
 		task.wait(1)
 	end
