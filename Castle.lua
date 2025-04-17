@@ -125,41 +125,6 @@ local function getCurrentCastleFloor()
 	return nil
 end
 
-local function handleLeaveLogic()
-	local currentFloorText = getCurrentCastleFloor()
-	local targetFloor = "Floor: " .. getgenv().FloorLevel .. "/100"
-
-	if currentFloorText and currentFloorText == targetFloor then
-		if getgenv().LeaveMode == "KillBossOnly" then
-			killBossOnly()
-		elseif getgenv().LeaveMode == "KillAll" then
-			killAllNPCsAndLeave()
-		elseif getgenv().LeaveMode == "LeaveDirectly" then
-			autoLeave()
-		end
-		return true
-	end
-	return false
-end
-
-local function killBossOnly()
-	local server = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
-	if not server then return end
-	for _, npc in pairs(server:GetChildren()) do
-		if npc:IsA("BasePart") and npc:GetAttribute("IsBoss") then
-			MoveToCFrame(npc)
-			repeat
-				FirePunch(npc.Name)
-				task.wait()
-			until IsNPCDead(npc)
-			FireAriseDestroy(npc.Name)
-			task.wait(1)
-			autoLeave()
-			break
-		end
-	end
-end
-
 local function killAllNPCsAndLeave()
 	LivingNPCs = {}
 	GetAllLivingNPCs()
@@ -175,6 +140,24 @@ local function killAllNPCsAndLeave()
 		end
 	end
 	autoLeave()
+end
+
+local function handleLeaveLogic()
+	local currentFloorText = getCurrentCastleFloor()
+	print(currentFloorText)
+	local targetFloor = "Floor: " .. getgenv().FloorLevel .. "/100"
+
+	if currentFloorText and currentFloorText == targetFloor then
+		if getgenv().LeaveMode == "KillBossOnly" then
+			killBossOnly()
+		elseif getgenv().LeaveMode == "KillAll" then
+			killAllNPCsAndLeave()
+		elseif getgenv().LeaveMode == "LeaveDirectly" then
+			autoLeave()
+		end
+		return true
+	end
+	return false
 end
 
 player.CharacterAdded:Connect(function(char)
