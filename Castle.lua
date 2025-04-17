@@ -162,7 +162,7 @@ local function killBossOnly()
 	if not server then return end
 
 	for _, npc in ipairs(server:GetChildren()) do
-		if npc:IsA("BasePart") and npc:GetAttribute("isBoss") == true then
+		if npc:IsA("BasePart") and npc:GetAttribute("IsBoss") == true then
 			MoveToCFrame(npc)
 
 			while not IsNPCDead(npc) do
