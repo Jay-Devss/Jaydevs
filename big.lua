@@ -24,6 +24,28 @@ local npcQueue = {}
 getgenv().AutoFarm = true
 getgenv().autoAriseDestroy = true
 getgenv().ariseDestroyType = "Destroy"
+local LivingNPCs = {}
+
+local function RefreshLivingNPCs()
+    local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server"):FindFirstChild("8")
+    if not serverFolder then return end
+
+    -- Remove dead NPCs
+    for name, npc in pairs(LivingNPCs) do
+        if not npc or not npc:IsDescendantOf(workspace) or IsNPCDead(npc) then
+            LivingNPCs[name] = nil
+        end
+    end
+
+    -- Add new living NPCs
+    for _, npc in pairs(serverFolder:GetChildren()) do
+        if npc:IsA("BasePart") and npc:GetAttribute("Scale") == 2 and not LivingNPCs[npc.Name] then
+            if not IsNPCDead(npc) then
+                LivingNPCs[npc.Name] = npc
+            end
+        end
+    end
+end
 
 local function EnableAutoClick()
     if not player:GetAttribute("AutoClick") then
@@ -82,14 +104,15 @@ task.spawn(function()
     EnableAutoClick()
     local lastTarget = nil
     while getgenv().AutoFarm do
+        RefreshLivingNPCs()
+
         if lastTarget and IsNPCDead(lastTarget) then
             FireAriseDestroy(lastTarget)
             lastTarget = nil
         end
 
         if not currentTarget then
-            npcQueue = GetAllLivingNPCs()
-            for _, npc in pairs(npcQueue) do
+            for name, npc in pairs(LivingNPCs) do
                 if IsNPCLiving(npc) then
                     currentTarget = npc
                     MovePlatformTo(currentTarget)
@@ -98,10 +121,11 @@ task.spawn(function()
                 end
             end
         elseif IsNPCDead(currentTarget) then
+            LivingNPCs[currentTarget.Name] = nil
             lastTarget = currentTarget
             currentTarget = nil
         end
 
-        task.wait(0.1)
+        task.wait(0.2)
     end
 end)
