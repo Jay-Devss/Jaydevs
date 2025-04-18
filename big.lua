@@ -62,7 +62,7 @@ local function GetNearbyPosition(npc)
     return npcPos + (direction * offsetDistance)
 end
 
--- Bypass anti-teleport using a platform under the player
+-- Teleport using invisible platform method
 local function MoveToNPC(npc)
     local targetPosition = GetNearbyPosition(npc)
     targetCFramePosition = targetPosition
@@ -73,7 +73,7 @@ local function MoveToNPC(npc)
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    -- Create invisible platform under player
+    -- Create invisible platform
     local platform = Instance.new("Part")
     platform.Anchored = true
     platform.CanCollide = true
@@ -89,11 +89,11 @@ local function MoveToNPC(npc)
     weld.Part1 = hrp
     weld.Parent = platform
 
-    -- Move platform instead of player
+    -- Move platform under target
     platform.Position = targetPosition - Vector3.new(0, 3, 0)
     task.wait(0.1)
 
-    -- Clean up
+    -- Cleanup
     weld:Destroy()
     platform:Destroy()
 end
