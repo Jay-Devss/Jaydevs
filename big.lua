@@ -3,7 +3,7 @@ local humanoidRootPart = player.Character and player.Character:FindFirstChild("H
 local LivingNPCs = {}
 local currentTarget = nil
 local npcQueue = {}
-getgenv().isActive = true
+getgenv().AutoFarm = true
 getgenv().autoAriseDestroy = true
 getgenv().ariseDestroyType = "Destroy"
 
@@ -83,7 +83,7 @@ end
 task.spawn(function()
     EnableAutoClick()
     local lastTarget = nil
-    while getgenv().isActive do
+    while getgenv().AutoFarm do
         if lastTarget and IsNPCDead(lastTarget) then
             FireAriseDestroy(lastTarget)
             lastTarget = nil
