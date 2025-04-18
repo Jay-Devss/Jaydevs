@@ -60,12 +60,13 @@ local function GetNearbyPosition(npc)
 end
 
 local function MoveToCFrame(npc)
+local function MoveToCFrame(npc)
     local targetPosition = GetNearbyPosition(npc)
     targetCFramePosition = targetPosition
     local targetCFrame = CFrame.new(targetPosition)
 
     local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-    if distance <= 15 then
+    if distance <= 30 then
         player.Character:PivotTo(targetCFrame)
     else
         local step = (targetPosition - humanoidRootPart.Position).Unit * 15
@@ -187,20 +188,34 @@ local function killAllNPCsAndLeave()
 end
 
 local function killBossOnly()
+local function killBossOnly()
     local server = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
     if not server then return end
 
-    for _, npc in ipairs(server:GetChildren()) do
-        if npc:IsA("BasePart") and npc:GetAttribute("IsBoss") == true then
-            MoveToCFrame(npc)
-            while not IsNPCDead(npc) do
-                task.wait()
+    local bossFound = false
+    local startTime = os.clock()
+
+    repeat
+        for _, npc in ipairs(server:GetChildren()) do
+            if npc:IsA("BasePart") and npc:GetAttribute("IsBoss") == true then
+                bossFound = true
+                MoveToCFrame(npc)
+
+                while not IsNPCDead(npc) do
+                    task.wait()
+                end
+
+                FireAriseDestroy(npc.Name)
+                task.wait(1)
+                autoLeave()
+                return
             end
-            FireAriseDestroy(npc.Name)
-            task.wait(1)
-            autoLeave()
-            break
         end
+        task.wait(0.1)
+    until bossFound or os.clock() - startTime >= 5
+
+    if not bossFound then
+        autoLeave() -- No boss found within 5 seconds, auto leave as fallback
     end
 end
 
@@ -241,3 +256,18 @@ task.spawn(function()
         task.wait(0.5)
     end
 end)
+
+task.spawn(function()
+    while getgenv().isActive do
+        pcall(function()
+            if currentTarget and targetCFramePosition then
+                local distance = (humanoidRootPart.Position - targetCFramePosition).Magnitude
+                if distance > 5 then
+                    MoveToCFrame(currentTarget)
+                end
+            end
+        end)
+        task.wait(1) -- runs every second to verify
+    end
+end)
+
