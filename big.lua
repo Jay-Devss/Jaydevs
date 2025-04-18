@@ -62,21 +62,40 @@ local function GetNearbyPosition(npc)
     return npcPos + (direction * offsetDistance)
 end
 
+-- Bypass anti-teleport using a platform under the player
 local function MoveToNPC(npc)
     local targetPosition = GetNearbyPosition(npc)
     targetCFramePosition = targetPosition
-    local targetCFrame = CFrame.new(targetPosition)
 
-    local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-    if distance <= 30 then
-        player.Character:PivotTo(targetCFrame)
-    else
-        local step = (targetPosition - humanoidRootPart.Position).Unit * 30
-        while (humanoidRootPart.Position - targetPosition).Magnitude > 30 do
-            player.Character:PivotTo(CFrame.new(humanoidRootPart.Position + step))
-        end
-        player.Character:PivotTo(targetCFrame)
-    end
+    local character = player.Character
+    if not character then return end
+
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- Create invisible platform under player
+    local platform = Instance.new("Part")
+    platform.Anchored = true
+    platform.CanCollide = true
+    platform.Transparency = 1
+    platform.Size = Vector3.new(5, 1, 5)
+    platform.Name = "_TeleportPlatform"
+    platform.Position = hrp.Position - Vector3.new(0, 3, 0)
+    platform.Parent = workspace
+
+    -- Weld player to platform
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = platform
+    weld.Part1 = hrp
+    weld.Parent = platform
+
+    -- Move platform instead of player
+    platform.Position = targetPosition - Vector3.new(0, 3, 0)
+    task.wait(0.1)
+
+    -- Clean up
+    weld:Destroy()
+    platform:Destroy()
 end
 
 task.spawn(function()
