@@ -26,6 +26,10 @@ getgenv().autoAriseDestroy = true
 getgenv().ariseDestroyType = "Destroy"
 local LivingNPCs = {}
 
+local function IsNPCLiving(npc)
+    return npc and npc:GetAttribute("HP") > 0 and npc:GetAttribute("Dead") == false
+end
+
 local function RefreshLivingNPCs()
     local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server"):FindFirstChild("8")
     if not serverFolder then return end
@@ -51,22 +55,6 @@ local function EnableAutoClick()
     if not player:GetAttribute("AutoClick") then
         player:SetAttribute("AutoClick", true)
     end
-end
-
-local function GetAllLivingNPCs()
-    LivingNPCs = {}
-    local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server"):FindFirstChild("8")
-    if not serverFolder then return {} end
-    for _, npc in pairs(serverFolder:GetChildren()) do
-        if npc:IsA("BasePart") and npc:GetAttribute("Scale") == 2 then
-            LivingNPCs[npc.Name] = npc
-        end
-    end
-    return LivingNPCs
-end
-
-local function IsNPCLiving(npc)
-    return npc and npc:GetAttribute("HP") > 0 and npc:GetAttribute("Dead") == false
 end
 
 local function IsNPCDead(npc)
