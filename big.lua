@@ -20,7 +20,7 @@ weld.Parent = platform
 
 local LivingNPCs = {}
 local currentTarget = nil
-local lastTarget = nil
+local targetCFramePosition = nil
 
 getgenv().AutoFarm = true
 getgenv().autoAriseDestroy = true
@@ -32,23 +32,22 @@ local function IsNPCDead(npc)
     return npc:GetAttribute("Dead") == true
 end
 
-local function RefreshLivingNPCs()
+local function GetSortedLivingNPCs()
     local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server"):FindFirstChild("8")
-    if not serverFolder then return end
+    if not serverFolder then return {} end
 
-    for name, npc in pairs(LivingNPCs) do
-        if not npc or not npc:IsDescendantOf(workspace) or IsNPCDead(npc) then
-            LivingNPCs[name] = nil
-        end
-    end
-
+    local npcList = {}
     for _, npc in pairs(serverFolder:GetChildren()) do
-        if npc:IsA("BasePart") and npc:GetAttribute("Scale") == 2 and not LivingNPCs[npc.Name] then
-            if not IsNPCDead(npc) then
-                LivingNPCs[npc.Name] = npc
-            end
+        if npc:IsA("BasePart") and npc:GetAttribute("Scale") == 2 and not IsNPCDead(npc) then
+            table.insert(npcList, npc)
         end
     end
+
+    table.sort(npcList, function(a, b)
+        return (a.Position - humanoidRootPart.Position).Magnitude < (b.Position - humanoidRootPart.Position).Magnitude
+    end)
+
+    return npcList
 end
 
 local function EnableAutoClick()
@@ -78,35 +77,49 @@ local function GetNearbyPosition(npc)
 end
 
 local function MovePlatformTo(npc)
-    local targetPos = GetNearbyPosition(npc)
-    platform.CFrame = CFrame.new(targetPos + Vector3.new(0, -3.5, 0))
+    local pos = GetNearbyPosition(npc)
+    platform.CFrame = CFrame.new(pos + Vector3.new(0, -3.5, 0))
+    targetCFramePosition = pos
 end
+
+task.spawn(function()
+    while getgenv().AutoFarm do
+        task.wait(0.1)
+        if #LivingNPCs == 0 and not currentTarget then
+            LivingNPCs = GetSortedLivingNPCs()
+        end
+    end
+end)
 
 task.spawn(function()
     EnableAutoClick()
     while getgenv().AutoFarm do
-        RefreshLivingNPCs()
-
-        if lastTarget and IsNPCDead(lastTarget) then
-            FireAriseDestroy(lastTarget)
-            lastTarget = nil
-        end
-
-        if not currentTarget then
-            for name, npc in pairs(LivingNPCs) do
-                if not IsNPCDead(npc) then
-                    currentTarget = npc
-                    MovePlatformTo(currentTarget)
-                    lastTarget = npc
-                    break
-                end
-            end
-        elseif IsNPCDead(currentTarget) then
-            LivingNPCs[currentTarget.Name] = nil
-            lastTarget = currentTarget
+        if currentTarget and IsNPCDead(currentTarget) then
+            FireAriseDestroy(currentTarget)
             currentTarget = nil
         end
 
-        task.wait(0.2)
+        if not currentTarget and #LivingNPCs > 0 then
+            currentTarget = table.remove(LivingNPCs, 1)
+            if currentTarget then
+                MovePlatformTo(currentTarget)
+            end
+        end
+
+        task.wait(0.05)
+    end
+end)
+
+task.spawn(function()
+    while getgenv().AutoFarm do
+        pcall(function()
+            if currentTarget and targetCFramePosition then
+                local distance = (humanoidRootPart.Position - targetCFramePosition).Magnitude
+                if distance > 5 then
+                    MovePlatformTo(currentTarget)
+                end
+            end
+        end)
+        task.wait(0.1)
     end
 end)
