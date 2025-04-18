@@ -67,13 +67,13 @@ end
 
 local function FireAriseDestroy(npcName)
     if not getgenv().autoAriseDestroy then return end
-        for _ = 1, 3 do
-            game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
-                { Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture", Enemy = npcName },
-                "\4"
-            })
-            task.wait(0.3)
-    end)
+    for _ = 1, 3 do
+        game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+            { Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture", Enemy = npcName },
+            "\4"
+        })
+        task.wait(0.3)
+    end
 end
 
 local function IsNPCDead(npc)
