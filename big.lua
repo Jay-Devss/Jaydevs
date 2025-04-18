@@ -4,8 +4,6 @@ local LivingNPCs = {}
 local currentTarget = nil
 local npcQueue = {}
 getgenv().isActive = true
-getgenv().useTween = true
-getgenv().tweenSpeed = 300
 getgenv().autoAriseDestroy = true
 getgenv().ariseDestroyType = "Destroy"
 
@@ -66,13 +64,19 @@ end
 
 local function MoveToNPC(npc)
     local targetPosition = GetNearbyPosition(npc)
-    if getgenv().useTween then
-        if tween then tween:Cancel() end
-        local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPosition).Magnitude / getgenv().tweenSpeed, Enum.EasingStyle.Linear)
-        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
-        tween:Play()
+    targetCFramePosition = targetPosition
+    local targetCFrame = CFrame.new(targetPosition)
+
+    local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+    if distance <= 30 then
+        player.Character:PivotTo(targetCFrame)
     else
-        humanoidRootPart.CFrame = CFrame.new(targetPosition)
+        local step = (targetPosition - humanoidRootPart.Position).Unit * 15
+        while (humanoidRootPart.Position - targetPosition).Magnitude > 15 do
+            player.Character:PivotTo(CFrame.new(humanoidRootPart.Position + step))
+            task.wait(0.05)
+        end
+        player.Character:PivotTo(targetCFrame)
     end
 end
 
