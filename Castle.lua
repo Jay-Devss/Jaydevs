@@ -60,7 +60,6 @@ local function GetNearbyPosition(npc)
 end
 
 local function MoveToCFrame(npc)
-local function MoveToCFrame(npc)
     local targetPosition = GetNearbyPosition(npc)
     targetCFramePosition = targetPosition
     local targetCFrame = CFrame.new(targetPosition)
