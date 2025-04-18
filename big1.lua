@@ -71,8 +71,8 @@ local function MoveToNPC(npc)
     if distance <= 30 then
         player.Character:PivotTo(targetCFrame)
     else
-        local step = (targetPosition - humanoidRootPart.Position).Unit * 50
-        while (humanoidRootPart.Position - targetPosition).Magnitude > 50 do
+        local step = (targetPosition - humanoidRootPart.Position).Unit * 30
+        while (humanoidRootPart.Position - targetPosition).Magnitude > 30 do
             player.Character:PivotTo(CFrame.new(humanoidRootPart.Position + step))
         end
         player.Character:PivotTo(targetCFrame)
