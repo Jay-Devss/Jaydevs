@@ -1,11 +1,41 @@
+
 local player = game.Players.LocalPlayer
-local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Character = player.Character or player.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local LivingNPCs = {}
 local currentTarget = nil
 local npcQueue = {}
+
 getgenv().AutoFarm = true
 getgenv().autoAriseDestroy = true
 getgenv().ariseDestroyType = "Destroy"
+
+local platform = Instance.new("Part")
+platform.Size = Vector3.new(5, 1, 5)
+platform.Transparency = 1
+platform.Anchored = false
+platform.CanCollide = true
+platform.Name = "_GlidePlatform"
+platform.Parent = workspace
+
+local alignPos = Instance.new("AlignPosition", platform)
+alignPos.RigidityEnabled = true
+alignPos.MaxForce = math.huge
+alignPos.Responsiveness = 200
+
+local alignOri = Instance.new("AlignOrientation", platform)
+alignOri.RigidityEnabled = true
+alignOri.MaxTorque = math.huge
+alignOri.Responsiveness = 200
+
+local att0 = Instance.new("Attachment", platform)
+local att1 = Instance.new("Attachment", HumanoidRootPart)
+alignPos.Attachment0 = att0
+alignPos.Attachment1 = att1
+alignOri.Attachment0 = att0
+alignOri.Attachment1 = att1
 
 local function EnableAutoClick()
     local autoClick = player:GetAttribute("AutoClick")
@@ -43,7 +73,7 @@ local function FireAriseDestroy(npc)
     if not getgenv().autoAriseDestroy then return end
     task.wait(0.1)
     for _ = 1, 3 do
-        game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+        ReplicatedStorage.BridgeNet2.dataRemoteEvent:FireServer({
             {
                 Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
                 Enemy = npc.Name
@@ -56,46 +86,16 @@ end
 
 local function GetNearbyPosition(npc)
     local hitboxRadius = 3
-    local npcPos = npc.CFrame.Position
-    local direction = (humanoidRootPart.Position - npcPos).Unit
+    local npcPos = npc.Position
+    local direction = (HumanoidRootPart.Position - npcPos).Unit
     local offsetDistance = hitboxRadius + math.random(1,3)
     return npcPos + (direction * offsetDistance)
 end
 
--- Teleport using invisible platform method
 local function MoveToNPC(npc)
-    local targetPosition = GetNearbyPosition(npc)
-    targetCFramePosition = targetPosition
-
-    local character = player.Character
-    if not character then return end
-
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    -- Create invisible platform
-    local platform = Instance.new("Part")
-    platform.Anchored = true
-    platform.CanCollide = true
-    platform.Transparency = 1
-    platform.Size = Vector3.new(5, 1, 5)
-    platform.Name = "_TeleportPlatform"
-    platform.Position = hrp.Position - Vector3.new(0, 3, 0)
-    platform.Parent = workspace
-
-    -- Weld player to platform
-    local weld = Instance.new("WeldConstraint")
-    weld.Part0 = platform
-    weld.Part1 = hrp
-    weld.Parent = platform
-
-    -- Move platform under target
-    platform.Position = targetPosition - Vector3.new(0, 3, 0)
-    task.wait(0.1)
-
-    -- Cleanup
-    weld:Destroy()
-    platform:Destroy()
+    local pos = GetNearbyPosition(npc)
+    att0.WorldPosition = pos - Vector3.new(0, 3, 0)
+    att0.WorldOrientation = Vector3.new(0, 0, 0)
 end
 
 task.spawn(function()
