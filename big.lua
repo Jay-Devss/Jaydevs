@@ -20,28 +20,28 @@ weld.Parent = platform
 
 local LivingNPCs = {}
 local currentTarget = nil
-local npcQueue = {}
+local lastTarget = nil
+
 getgenv().AutoFarm = true
 getgenv().autoAriseDestroy = true
 getgenv().ariseDestroyType = "Destroy"
-local LivingNPCs = {}
 
-local function IsNPCLiving(npc)
-    return npc and npc:GetAttribute("HP") > 0 and npc:GetAttribute("Dead") == false
+local function IsNPCDead(npc)
+    local success, hp = pcall(function() return npc:GetAttribute("HP") end)
+    if success and hp == 0 then return true end
+    return npc:GetAttribute("Dead") == true
 end
 
 local function RefreshLivingNPCs()
     local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server"):FindFirstChild("8")
     if not serverFolder then return end
 
-    -- Remove dead NPCs
     for name, npc in pairs(LivingNPCs) do
         if not npc or not npc:IsDescendantOf(workspace) or IsNPCDead(npc) then
             LivingNPCs[name] = nil
         end
     end
 
-    -- Add new living NPCs
     for _, npc in pairs(serverFolder:GetChildren()) do
         if npc:IsA("BasePart") and npc:GetAttribute("Scale") == 2 and not LivingNPCs[npc.Name] then
             if not IsNPCDead(npc) then
@@ -55,12 +55,6 @@ local function EnableAutoClick()
     if not player:GetAttribute("AutoClick") then
         player:SetAttribute("AutoClick", true)
     end
-end
-
-local function IsNPCDead(npc)
-    local success, hp = pcall(function() return npc:GetAttribute("HP") end)
-    if success and hp == 0 then return true end
-    return npc:GetAttribute("Dead") == true
 end
 
 local function FireAriseDestroy(npc)
@@ -90,7 +84,6 @@ end
 
 task.spawn(function()
     EnableAutoClick()
-    local lastTarget = nil
     while getgenv().AutoFarm do
         RefreshLivingNPCs()
 
@@ -101,7 +94,7 @@ task.spawn(function()
 
         if not currentTarget then
             for name, npc in pairs(LivingNPCs) do
-                if IsNPCLiving(npc) then
+                if not IsNPCDead(npc) then
                     currentTarget = npc
                     MovePlatformTo(currentTarget)
                     lastTarget = npc
