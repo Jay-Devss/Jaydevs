@@ -1,17 +1,13 @@
+local player = game.Players.LocalPlayer
+local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+local LivingNPCs = {}
+local currentTarget = nil
+local npcQueue = {}
 getgenv().isActive = true
 getgenv().useTween = true
-getgenv().tweenSpeed = 500 -- studs per second
+getgenv().tweenSpeed = 300
 getgenv().autoAriseDestroy = true
-getgenv().ariseDestroyType = "Destroy" -- or "Capture"
-
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
-local TweenService = game:GetService("TweenService")
-local npcQueue = {}
-local currentTarget = nil
-local tween = nil
+getgenv().ariseDestroyType = "Destroy"
 
 local function EnableAutoClick()
     local autoClick = player:GetAttribute("AutoClick")
@@ -20,60 +16,29 @@ local function EnableAutoClick()
     end
 end
 
-local function IsNPCLiving(npc)
-    if not npc then return false end
-    local healthBar = npc:FindFirstChild("HealthBar")
-    if not healthBar then return false end
-    local main = healthBar:FindFirstChild("Main")
-    local bar = main and main:FindFirstChild("Bar")
-    local amount = bar and bar:FindFirstChild("Amount")
-    return amount and amount:IsA("TextLabel") and amount.Text ~= "0 HP"
-end
-
-local function IsValidSize(npc)
-    local humanoidRootPart = npc:FindFirstChild("HumanoidRootPart")
-    return humanoidRootPart and humanoidRootPart.Size == Vector3.new(4, 4, 2)
-end
-
 local function GetAllLivingNPCs()
-    local mainFolder = workspace:FindFirstChild("__Main")
-    if not mainFolder then return {} end
-    local enemiesFolder = mainFolder:FindFirstChild("__Enemies")
-    if not enemiesFolder then return {} end
-    local clientFolder = enemiesFolder:FindFirstChild("Client")
-    if not clientFolder then return {} end
-
-    local npcs = {}
-    for _, enemy in pairs(clientFolder:GetChildren()) do
-        if IsValidSize(enemy) and IsNPCLiving(enemy) then
-            table.insert(npcs, enemy)
+    LivingNPCs = {}
+    local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server"):FindFirstChild("8")
+    if not serverFolder then return {} end
+    for _, npc in pairs(serverFolder:GetChildren()) do
+        if npc:IsA("BasePart") and npc:GetAttribute("Scale") == 2 then
+            LivingNPCs[npc.Name] = npc
         end
     end
-    return npcs
+    return LivingNPCs
 end
 
-local function GetNearbyPosition(npc)
-    local hitboxRadius = 5
-    local npcHumanoid = npc:FindFirstChildOfClass("Humanoid")
-    if npcHumanoid then
-        hitboxRadius = npcHumanoid.HipHeight + 3
-    end
-    local npcPos = npc.HumanoidRootPart.Position
-    local dir = (humanoidRootPart.Position - npcPos).Unit
-    local offset = hitboxRadius + math.random(1, 3)
-    return npcPos + (dir * offset)
+local function IsNPCLiving(npc)
+    return npc and npc:GetAttribute("HP") > 0 and npc:GetAttribute("Dead") == false
 end
 
-local function MoveToNPC(npc)
-    local targetPosition = GetNearbyPosition(npc)
-    if getgenv().useTween then
-        if tween then tween:Cancel() end
-        local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPosition).Magnitude / getgenv().tweenSpeed, Enum.EasingStyle.Linear)
-        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
-        tween:Play()
-    else
-        humanoidRootPart.CFrame = CFrame.new(targetPosition)
+local function IsNPCDead(npc)
+    local success, hp = pcall(function() return npc:GetAttribute("HP") end)
+    if success and hp == 0 then
+        return true
     end
+    local deadAttr = npc and npc:GetAttribute("Dead")
+    return deadAttr == true
 end
 
 local function FireAriseDestroy(npc)
@@ -91,24 +56,38 @@ local function FireAriseDestroy(npc)
     end
 end
 
-local function ResetCharacter()
-    character = player.Character or player.CharacterAdded:Wait()
-    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local function GetNearbyPosition(npc)
+    local hitboxRadius = 3
+    local npcPos = npc.CFrame.Position
+    local direction = (humanoidRootPart.Position - npcPos).Unit
+    local offsetDistance = hitboxRadius + math.random(1,3)
+    return npcPos + (direction * offsetDistance)
 end
 
-player.CharacterAdded:Connect(ResetCharacter)
+local function MoveToNPC(npc)
+    local targetPosition = GetNearbyPosition(npc)
+    if getgenv().useTween then
+        if tween then tween:Cancel() end
+        local tweenInfo = TweenInfo.new((humanoidRootPart.Position - targetPosition).Magnitude / getgenv().tweenSpeed, Enum.EasingStyle.Linear)
+        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
+        tween:Play()
+    else
+        humanoidRootPart.CFrame = CFrame.new(targetPosition)
+    end
+end
 
 task.spawn(function()
     EnableAutoClick()
     local lastTarget = nil
     while getgenv().isActive do
-        if lastTarget and not IsNPCLiving(lastTarget) then
+        if lastTarget and IsNPCDead(lastTarget) then
             FireAriseDestroy(lastTarget)
             lastTarget = nil
         end
+
         if not currentTarget then
             npcQueue = GetAllLivingNPCs()
-            for _, npc in ipairs(npcQueue) do
+            for _, npc in pairs(npcQueue) do
                 if IsNPCLiving(npc) then
                     currentTarget = npc
                     MoveToNPC(currentTarget)
@@ -116,12 +95,11 @@ task.spawn(function()
                     break
                 end
             end
-        elseif not IsNPCLiving(currentTarget) then
+        elseif IsNPCDead(currentTarget) then
             lastTarget = currentTarget
             currentTarget = nil
         end
+
         task.wait(0.1)
     end
 end)
-
-EnableAutoClick()
