@@ -2,39 +2,23 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-local TweenService = game:GetService("TweenService")
 local VirtualUser = game:GetService("VirtualUser")
 local LivingNPCs = {}
 local currentTarget = nil
-local tween = nil
 local lastDeadNPC = nil
 local targetCFramePosition = nil
 local kill = true
-
-local function EnableAutoClick()
-    local autoClick = player:GetAttribute("AutoClick")
-    if autoClick == nil or autoClick == false then
-        player:SetAttribute("AutoClick", true)
-    end
-end
-
-local function FireAriseDestroy(npcName)
-    if not getgenv().autoAriseDestroy then return end
-    task.spawn(function()
-        for _ = 1, 3 do
-            game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
-                { Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture", Enemy = npcName },
-                "\4"
-            })
-            task.wait(0.3)
-        end
-    end)
-end
 
 local function FreezePlayer(state)
     if character and character:FindFirstChild("Humanoid") then
         character.Humanoid.AutoRotate = not state
         character.Humanoid.WalkSpeed = state and 0 or 16
+    end
+end
+
+local function EnableAutoClick()
+    if not player:GetAttribute("AutoClick") then
+        player:SetAttribute("AutoClick", true)
     end
 end
 
@@ -63,18 +47,44 @@ local function MoveToCFrame(npc)
     local targetPosition = GetNearbyPosition(npc)
     targetCFramePosition = targetPosition
     local targetCFrame = CFrame.new(targetPosition)
-
     local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+
     if distance <= 15 then
         player.Character:PivotTo(targetCFrame)
     else
-        local step = (targetPosition - humanoidRootPart.Position).Unit * 15
-        while (humanoidRootPart.Position - targetPosition).Magnitude > 15 do
-            player.Character:PivotTo(CFrame.new(humanoidRootPart.Position + step))
-            task.wait(0.05)
+        local steps = math.ceil(distance / 14)
+        local startPos = humanoidRootPart.Position
+        for i = 1, steps do
+            local progress = i / steps
+            local intermediate = startPos:Lerp(targetPosition, progress)
+            player.Character:PivotTo(CFrame.new(intermediate))
+            task.wait(0.03)
         end
-        player.Character:PivotTo(targetCFrame)
     end
+
+    task.spawn(function()
+        while currentTarget and currentTarget:IsDescendantOf(workspace) and not IsNPCDead(currentTarget) do
+            local targetPos = targetCFramePosition
+            local playerPos = humanoidRootPart.Position
+            if (playerPos - targetPos).Magnitude > 5 then
+                player.Character:PivotTo(CFrame.new(targetPos))
+            end
+            task.wait(0.5)
+        end
+    end)
+end
+
+local function FireAriseDestroy(npcName)
+    if not getgenv().autoAriseDestroy then return end
+    task.spawn(function()
+        while currentTarget and currentTarget.Name == npcName and not IsNPCDead(currentTarget) do
+            game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+                { Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture", Enemy = npcName },
+                "\4"
+            })
+            task.wait(0.3)
+        end
+    end)
 end
 
 local function IsNPCDead(npc)
@@ -122,7 +132,6 @@ local function KillAllNPCs()
         while kill and getgenv().isActive do
             if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
                 if currentTarget and IsNPCDead(currentTarget) then
-                    FireAriseDestroy(currentTarget.Name)
                     lastDeadNPC = currentTarget
                 end
                 currentTarget = nil
@@ -131,13 +140,9 @@ local function KillAllNPCs()
                     if npc and not IsNPCDead(npc) then
                         currentTarget = npc
                         MoveToCFrame(npc)
+                        FireAriseDestroy(name)
                         break
                     end
-                end
-            elseif currentTarget and not IsNPCDead(currentTarget) then
-                local distance = (humanoidRootPart.Position - currentTarget.Position).Magnitude
-                if distance > 10 then
-                    MoveToCFrame(currentTarget)
                 end
             end
             task.wait()
@@ -154,7 +159,6 @@ local function killAllNPCsAndLeave()
         while getgenv().isActive do
             if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
                 if currentTarget and IsNPCDead(currentTarget) then
-                    FireAriseDestroy(currentTarget.Name)
                     lastDeadNPC = currentTarget
                 end
                 currentTarget = nil
@@ -163,6 +167,7 @@ local function killAllNPCsAndLeave()
                     if npc and not IsNPCDead(npc) then
                         currentTarget = npc
                         MoveToCFrame(npc)
+                        FireAriseDestroy(name)
                         break
                     end
                 end
@@ -175,7 +180,6 @@ local function killAllNPCsAndLeave()
                     break
                 end
             end
-
             if allDead then
                 autoLeave()
                 break
@@ -190,8 +194,11 @@ local function killBossOnly()
     local server = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
     if not server then return end
 
+    local bossFound = false
     for _, npc in ipairs(server:GetChildren()) do
         if npc:IsA("BasePart") and npc:GetAttribute("IsBoss") == true then
+            bossFound = true
+            EnableAutoClick()
             MoveToCFrame(npc)
             while not IsNPCDead(npc) do
                 task.wait()
@@ -202,6 +209,14 @@ local function killBossOnly()
             break
         end
     end
+
+    if not bossFound then
+        task.delay(10, function()
+            if not IsNPCDead(currentTarget) then
+                autoLeave()
+            end
+        end)
+    end
 end
 
 local function handleLeaveLogic()
@@ -211,11 +226,11 @@ local function handleLeaveLogic()
         if getgenv().LeaveMode == "KillBossOnly" then
             killBossOnly()
         elseif getgenv().LeaveMode == "KillAll" then
+            kill = false
             killAllNPCsAndLeave()
         elseif getgenv().LeaveMode == "LeaveDirectly" then
             autoLeave()
         end
-        kill = false
         return true
     end
     return false
@@ -237,6 +252,8 @@ task.spawn(function()
         if not handleLeaveLogic() then
             kill = true
             KillAllNPCs()
+        else
+            kill = false
         end
         task.wait(0.5)
     end
