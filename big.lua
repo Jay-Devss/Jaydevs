@@ -33,7 +33,7 @@ local function IsNPCDead(npc)
 end
 
 local function GetSortedLivingNPCs()
-    local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server"):FindFirstChild("8")
+    local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server"):FindFirstChild("9")
     if not serverFolder then return {} end
 
     local npcList = {}
