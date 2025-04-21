@@ -27,106 +27,99 @@ getgenv().autoAriseDestroy = true
 getgenv().ariseDestroyType = "Destroy"
 
 local function IsNPCDead(npc)
-    local success, hp = pcall(function() return npc:GetAttribute("HP") end)
-    if success and hp == 0 then return true end
-    return npc:GetAttribute("Dead") == true
+	local success, hp = pcall(function() return npc:GetAttribute("HP") end)
+	if success and hp == 0 then return true end
+	return npc:GetAttribute("Dead") == true
 end
 
 local function GetSortedLivingNPCs()
-    local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server"):FindFirstChild("9")
-    if not serverFolder then return {} end
-
-    local npcList = {}
-    for _, npc in pairs(serverFolder:GetChildren()) do
-        if npc:IsA("BasePart") and npc:GetAttribute("Scale") == 2 and not IsNPCDead(npc) then
-            table.insert(npcList, npc)
-        end
-    end
-
-    table.sort(npcList, function(a, b)
-        return (a.Position - humanoidRootPart.Position).Magnitude < (b.Position - humanoidRootPart.Position).Magnitude
-    end)
-
-    return npcList
+	local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server"):FindFirstChild("9")
+	if not serverFolder then return {} end
+	local npcList = {}
+	for _, npc in pairs(serverFolder:GetChildren()) do
+		if npc:IsA("BasePart") and npc:GetAttribute("Scale") == 2 and not IsNPCDead(npc) then
+			table.insert(npcList, npc)
+		end
+	end
+	table.sort(npcList, function(a, b)
+		return (a.Position - humanoidRootPart.Position).Magnitude < (b.Position - humanoidRootPart.Position).Magnitude
+	end)
+	return npcList
 end
 
 local function EnableAutoClick()
-    if not player:GetAttribute("AutoClick") then
-        player:SetAttribute("AutoClick", true)
-    end
+	if not player:GetAttribute("AutoClick") then
+		player:SetAttribute("AutoClick", true)
+	end
 end
 
 local function FireAriseDestroy(npc)
-    if not getgenv().autoAriseDestroy then return end
-    task.wait(0.1)
-    for _ = 1, 3 do
-        game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
-            {
-                Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
-                Enemy = npc.Name
-            },
-            "\4"
-        })
-        task.wait(0.3)
-    end
+	if not getgenv().autoAriseDestroy then return end
+	task.wait(0.1)
+	for _ = 1, 3 do
+		game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
+			{
+				Event = getgenv().ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
+				Enemy = npc.Name
+			},
+			"\4"
+		})
+		task.wait(0.3)
+	end
 end
 
 local function GetNearbyPosition(npc)
-    local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
-    return npc.Position + offset
+	local offset = Vector3.new(math.random(-2, 2), 0, math.random(-2, 2))
+	return npc.Position + offset
 end
 
 local function MovePlatformTo(npc)
-    local pos = GetNearbyPosition(npc)
-    platform.CFrame = CFrame.new(pos + Vector3.new(0, -3.5, 0))
-    targetCFramePosition = pos
+	local pos = GetNearbyPosition(npc)
+	platform.CFrame = CFrame.new(pos + Vector3.new(0, -3.5, 0))
+	targetCFramePosition = pos
 end
 
-task.spawn(function()
-    while getgenv().AutoFarm do
-        task.wait(0.1)
-        if #LivingNPCs == 0 and not currentTarget then
-            LivingNPCs = GetSortedLivingNPCs()
-        end
-    end
-end)
+local RunService = game:GetService("RunService")
 
 task.spawn(function()
-    EnableAutoClick()
-    while getgenv().AutoFarm do
-        if currentTarget and IsNPCDead(currentTarget) then
-            FireAriseDestroy(currentTarget)
-            currentTarget = nil
-        end
+	EnableAutoClick()
+	while getgenv().AutoFarm do
+		if currentTarget then
+			if IsNPCDead(currentTarget) then
+				FireAriseDestroy(currentTarget)
+				currentTarget = nil
+				targetCFramePosition = nil
+			end
+		end
 
-        if not currentTarget and #LivingNPCs > 0 then
-            currentTarget = table.remove(LivingNPCs, 1)
-            if currentTarget then
-                MovePlatformTo(currentTarget)
-            end
-        end
+		if not currentTarget then
+			repeat
+				LivingNPCs = GetSortedLivingNPCs()
+				while #LivingNPCs > 0 and (not LivingNPCs[1] or IsNPCDead(LivingNPCs[1])) do
+					table.remove(LivingNPCs, 1)
+				end
+				currentTarget = table.remove(LivingNPCs, 1)
+			until not getgenv().AutoFarm or currentTarget
 
-        task.wait()
-    end
-end)
+			if currentTarget then
+				MovePlatformTo(currentTarget)
+			end
+		end
 
-task.spawn(function()
-    while getgenv().AutoFarm do
-        pcall(function()
-            if currentTarget and targetCFramePosition then
-                local distance = (humanoidRootPart.Position - targetCFramePosition).Magnitude
-                if distance > 5 then
-                    MovePlatformTo(currentTarget)
-                end
-            end
-        end)
-        task.wait(0.1)
-    end
+		if currentTarget and targetCFramePosition then
+			local distance = (humanoidRootPart.Position - targetCFramePosition).Magnitude
+			if distance > 5 then
+				MovePlatformTo(currentTarget)
+			end
+		end
+
+		RunService.Heartbeat:Wait()
+	end
 end)
 
 local VirtualUser = game:GetService("VirtualUser")
-game:GetService("Players").LocalPlayer.Idled:Connect(function()
-    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    wait(1)
-    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+player.Idled:Connect(function()
+	VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+	wait(1)
+	VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 end)
