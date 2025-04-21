@@ -390,8 +390,7 @@ Tabs.Dungeon:AddSlider("TpDelaySlider", {
     Default = 0.5,
     Min = 0.1,
     Max = 3,
-    Rounding = 0,
-    Increment = 0.1,
+    Rounding = 0.1,
     Callback = function(value)
         tp_delay = value
     end
