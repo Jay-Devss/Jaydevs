@@ -61,16 +61,19 @@ local function MoveToCFrame(npc)
 	targetCFramePosition = targetPosition
 	local adjustedPosition = targetPosition - Vector3.new(0, 3, 0)
 
+	if tween then tween:Cancel() end
+	local tweenInfo
+
 	if getgenv().useTween then
-		if tween then tween:Cancel() end
 		local distance = (humanoidRootPart.Position - targetPosition).Magnitude
 		local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
-		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-		tween = TweenService:Create(platform.PrimaryPart, tweenInfo, {Position = adjustedPosition})
-		tween:Play()
+		tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
 	else
-		platform:MoveTo(adjustedPosition)
+		tweenInfo = TweenInfo.new(0.001, Enum.EasingStyle.Linear) -- instant tween
 	end
+
+	tween = TweenService:Create(platform, tweenInfo, {Position = adjustedPosition})
+	tween:Play()
 end
 
 local function FirePunch(npcName)
