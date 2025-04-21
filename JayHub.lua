@@ -19,7 +19,8 @@ local autoBypass = false
 local autoCastle = false 
 local autoJoinJay = false 
 local ultimateDungeon = false 
-local delay = 0.5 
+local delay = 0.5
+local tp_delay = 0.1
 local targetUser = "Jayalwayspaldooo7" 
 local fixedDungeonID = 7948501548 
 local skipDoubleDungeon = false 
@@ -252,7 +253,7 @@ task.spawn(function()
                         if useTween then
                             MoveToCFrame(npc)
                         else
-                            task.wait(0.1)
+                            task.wait(tp_delay)
                             if currentTarget == npc then
                                 MoveToCFrame(npc)
                             end
@@ -380,6 +381,18 @@ Tabs.Dungeon:AddSlider("TweenSpeedSlider", {
     Rounding = 0,
     Callback = function(value)
         tweenSpeed = value
+    end
+})
+
+Tabs.Dungeon:AddSlider("TweenSpeedSlider", {
+    Title = "Tween Speed",
+    Description = "Used only with 'Fast (Teleport)'",
+    Default = 0.5,
+    Min = 0.1,
+    Max = 3,
+    Rounding = 0.1,
+    Callback = function(value)
+        tp_delay = value
     end
 })
 
