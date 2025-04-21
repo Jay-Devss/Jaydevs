@@ -47,15 +47,16 @@ function NotifyWebhook()
                 local hud = playerGui and playerGui:FindFirstChild("Hud")
                 local upContainer = hud and hud:FindFirstChild("UpContanier")
                 local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
+                local text = dungeonIndo and dungeonInfo:FindFirstChild("TextLabel")
 
-                if dungeonInfo and dungeonInfo:IsA("TextLabel") then
+                if text and text:IsA("TextLabel") then
                     local text = dungeonInfo.Text
 
                     if text == "Double Dungeon Appear" then
                         isDoubleDungeon = true
                     end
 
-                    if text == "Dungeon Ends in 12s" and not sent then
+                    if text == "Dungeon Ends in 20s" and not sent then
                         sent = true
                         local endTime = os.time()
                         local duration = os.difftime(endTime, startTime)
