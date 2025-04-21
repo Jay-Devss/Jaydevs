@@ -283,7 +283,7 @@ end)
 
 task.spawn(function()
     while true do
-        if isActive and lastDeadNPC then
+        if lastDeadNPC then
             FireAriseDestroy(lastDeadNPC.Name)
             lastDeadNPC = nil
         end
@@ -390,7 +390,7 @@ Tabs.Dungeon:AddSlider("TpDelaySlider", {
     Default = 0.5,
     Min = 0.1,
     Max = 3,
-    Rounding = 0.1,
+    Rounding = 1,
     Callback = function(value)
         tp_delay = value
     end
