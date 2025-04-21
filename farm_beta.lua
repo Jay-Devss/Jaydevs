@@ -57,7 +57,6 @@ local function GetNearbyPosition(npc)
 end
 
 local function MoveToCFrame(npc)
-local function MoveToCFrame(npc)
 	local targetPosition = GetNearbyPosition(npc)
 	targetCFramePosition = targetPosition
 	local adjustedPosition = targetPosition - Vector3.new(0, 3, 0)
