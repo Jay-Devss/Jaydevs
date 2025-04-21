@@ -108,7 +108,7 @@ local spawnMap = {
     ["Nipon City"] = "ChainsawWorld",
     ["Jojo City"] = "JojoWorld",
     ["Dragon City"] = "DBWorld",
-    ["Punch City"] = "XZWorld"
+    ["Punch City"] = "OPMWorld"
 }
 
 local function fireDungeonEvent(argsTable) dataRemoteEvent:FireServer(unpack(argsTable)) end
@@ -252,7 +252,7 @@ task.spawn(function()
                         if useTween then
                             MoveToCFrame(npc)
                         else
-                            task.wait(0.3)
+                            task.wait(0.1)
                             if currentTarget == npc then
                                 MoveToCFrame(npc)
                             end
@@ -376,7 +376,7 @@ Tabs.Dungeon:AddSlider("TweenSpeedSlider", {
     Description = "Used only with 'Slow (Tween)'",
     Default = 100,
     Min = 50,
-    Max = 300,
+    Max = 700,
     Rounding = 0,
     Callback = function(value)
         tweenSpeed = value
