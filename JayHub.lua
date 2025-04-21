@@ -384,13 +384,14 @@ Tabs.Dungeon:AddSlider("TweenSpeedSlider", {
     end
 })
 
-Tabs.Dungeon:AddSlider("TweenSpeedSlider", {
-    Title = "Tween Speed",
+Tabs.Dungeon:AddSlider("TpDelaySlider", {
+    Title = "Teleport Delay",
     Description = "Used only with 'Fast (Teleport)'",
     Default = 0.5,
     Min = 0.1,
     Max = 3,
-    Rounding = 0.1,
+    Rounding = 0,
+    Increment = 0.1,
     Callback = function(value)
         tp_delay = value
     end
