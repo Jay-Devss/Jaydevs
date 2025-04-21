@@ -5,10 +5,24 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-getgenv().UltimateDungeon = getgenv().UltimateDungeon or false
+getgenv().UltimateDungeon = false
+getgenv().isAutoRejoinActive = true
+getgenv().isAutoLeftActive = false
+getgenv().autoCastle = false
+getgenv().autoJoinJay = false
+
 local targetUser = "Jayalwayspaldooo7"
 local fixedDungeonID = 7948501548
-local delay = 0.5
+local delay = 0.1
+
+local function getDungeonInfoLabel() 
+  local playerGui = player:FindFirstChild("PlayerGui") 
+  local hud = playerGui and playerGui:FindFirstChild("Hud") 
+  local upContainer = hud and hud:FindFirstChild("UpContanier") 
+  local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo") 
+  local text = dungeonInfo and dungeonInfo:FindFirstChild("TextLabel")
+  return text 
+end
 
 local function fireDungeonEvent(argsTable)
     dataRemoteEvent:FireServer(unpack(argsTable))
@@ -209,11 +223,8 @@ local function autoRejoin()
     task.spawn(function()
         while getgenv().isAutoRejoinActive do
             pcall(function()
-                local playerGui = player:FindFirstChild("PlayerGui")
-                local hud = playerGui and playerGui:FindFirstChild("Hud")
-                local upContainer = hud and hud:FindFirstChild("UpContanier")
-                local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
-                if dungeonInfo and dungeonInfo:IsA("TextLabel") and dungeonInfo.Text == "Dungeon Ends in 20s" and not rejoinCooldown then
+                local Text = getDungeonInfoLabel()
+                if Text == "Dungeon Ends in 20s" and not rejoinCooldown then
                     rejoinCooldown = true
                     if getgenv().autoJoinJay and player.Name ~= targetUser then
                         local found = false
@@ -255,11 +266,9 @@ local function autoRejoin()
                         task.wait(delay)
                     end
                     startDungeon()
-                    task.wait(1)
-                    rejoinCooldown = false
                 end
             end)
-            task.wait(0.5)
+            task.wait(0.1)
         end
     end)
 end
