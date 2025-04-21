@@ -57,22 +57,22 @@ local function GetNearbyPosition(npc)
 end
 
 local function MoveToCFrame(npc)
+local function MoveToCFrame(npc)
 	local targetPosition = GetNearbyPosition(npc)
 	targetCFramePosition = targetPosition
-	local targetCFrame = CFrame.new(targetPosition - Vector3.new(0, 3, 0))
+	local adjustedPosition = targetPosition - Vector3.new(0, 3, 0)
 
 	if getgenv().useTween then
 		if tween then tween:Cancel() end
 		local distance = (humanoidRootPart.Position - targetPosition).Magnitude
 		local duration = math.clamp(distance / getgenv().tweenSpeed, 0.05, 1)
 		local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-		tween = TweenService:Create(platform, tweenInfo, {Position = targetCFrame.Position})
+		tween = TweenService:Create(platform.PrimaryPart, tweenInfo, {Position = adjustedPosition})
 		tween:Play()
 	else
-		platform:PivotTo(targetCFrame)
+		platform:MoveTo(adjustedPosition)
 	end
 end
-
 
 local function FirePunch(npcName)
 	game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
