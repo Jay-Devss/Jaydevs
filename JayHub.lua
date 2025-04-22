@@ -22,7 +22,8 @@ local ultimateDungeon = false
 local delay = 0.5
 local tp_delay = 0.1
 local targetUser = "Jayalwayspaldooo7" 
-local fixedDungeonID = 7948501548 
+-- local fixedDungeonID = 7948501548
+local fixedDungeonID = 1939248
 local skipDoubleDungeon = false 
 local dungeonAction = "None"
 local isActive = false
@@ -92,6 +93,7 @@ TextButton.MouseButton1Click:Connect(function()
 end)
 
 local Tabs = {
+    Info = Window:AddTab({ Title = "Info", Icon = "heart" }),
     Main = Window:AddTab({ Title = "Main", Icon = "align-justify" }),
     Dungeon = Window:AddTab({ Title = "Dungeon", Icon = "heart" }),
     Teleport = Window:AddTab({ Title = "Teleport", Icon = "map-pin" }),
