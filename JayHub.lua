@@ -118,8 +118,18 @@ local function notify(title, content, duration) jay:Notify({ Title = title, Cont
 
 local function isInDungeonGame() local success, result = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId).Name end) return success and string.find(result, "Dungeon") ~= nil end
 
-local function buyDungeonTicket() fireDungeonEvent({ { { ["Type"] = "Gems", ["Event"] = "DungeonAction", ["Action"] = "BuyTicket" }, "\n" } }) end
-
+local function buyDungeonTicket()
+    fireDungeonEvent({
+        {
+            {
+                Type = "Gems",
+                Event = "DungeonAction",
+                Action = "BuyTicket"
+            },
+            "\011"
+        }
+    })
+end
 local function createDungeon()
     fireDungeonEvent({
         {
@@ -160,7 +170,48 @@ end
 
 local function DungeonText() if skipDoubleDungeon then return "Dungeon Ends in 20s" else return "Dungeon Ends in 12s" end end
 
-local function autoDungeonAction() task.spawn(function() while dungeonAction ~= "None" do pcall(function() local dungeonInfo = getDungeonInfoLabel() if dungeonInfo and dungeonInfo.Text == DungeonText() then if dungeonAction == "Leave" then VirtualInputManager:SendKeyEvent(true, "BackSlash", false, game) VirtualInputManager:SendKeyEvent(false, "BackSlash", false, game) task.wait(0.5) VirtualInputManager:SendKeyEvent(true, "Right", false, game) VirtualInputManager:SendKeyEvent(false, "Right", false, game) task.wait(0.5) for _ = 1, 3 do VirtualInputManager:SendKeyEvent(true, "Return", false, game) VirtualInputManager:SendKeyEvent(false, "Return", false, game) task.wait(0.2) end elseif dungeonAction == "Rejoin" then if autoJoinJay and player.Name ~= targetUser then local targetFound = Players:FindFirstChild(targetUser) if targetFound then while Players:FindFirstChild(targetUser) do buyDungeonTicket() task.wait(delay) fireDungeonEvent({ { { ["Dungeon"] = fixedDungeonID, ["Event"] = "DungeonAction", ["Action"] = "Join" }, "\n" } }) task.wait(1) end return end end buyDungeonTicket() task.wait(delay) createDungeon() task.wait(delay) if ultimateDungeon then addUltimateRune() task.wait(delay) end startDungeon() task.wait(1) end end end) task.wait(0.5) end end) end
+local function autoDungeonAction()
+    task.spawn(function()
+        while dungeonAction ~= "None" do
+            pcall(function()
+                local dungeonInfo = getDungeonInfoLabel()
+                if dungeonInfo and dungeonInfo.Text == DungeonText() then
+                    if dungeonAction == "Leave" then
+                        VirtualInputManager:SendKeyEvent(true, "BackSlash", false, game)
+                        VirtualInputManager:SendKeyEvent(false, "BackSlash", false, game)
+                        task.wait(0.5)
+                        VirtualInputManager:SendKeyEvent(true, "Right", false, game)
+                        VirtualInputManager:SendKeyEvent(false, "Right", false, game)
+                        task.wait(0.5)
+                        for _ = 1, 3 do
+                            VirtualInputManager:SendKeyEvent(true, "Return", false, game)
+                            VirtualInputManager:SendKeyEvent(false, "Return", false, game)
+                            task.wait(0.2)
+                        end
+                    elseif dungeonAction == "Rejoin" then
+                        if autoJoinJay and player.Name ~= targetUser then
+                            local targetFound = Players:FindFirstChild(targetUser)
+                            if targetFound then
+                                while Players:FindFirstChild(targetUser) do
+                                    task.wait(1)
+                                end
+                            end
+                        end
+                        buyDungeonTicket()
+                        task.wait(delay)
+                        createDungeon()
+                        task.wait(delay)
+                        startDungeon()
+                        task.wait(1)
+                        dungeonAction = "None"
+                        return
+                    end
+                end
+            end)
+            task.wait(0.5)
+        end
+    end)
+end
 
 local function FreezePlayer(state)
     if character and character:FindFirstChild("Humanoid") then
@@ -217,9 +268,14 @@ local function MoveToCFrame(npc)
 end
 
 local function FirePunch(npcName)
-    game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer({
-        { Event = "PunchAttack", Enemy = npcName },
-        "\4"
+    fireDungeonEvent({
+        {
+            {
+                Event = "PunchAttack",
+                Enemy = npcName
+            },
+            "\005"
+        }
     })
 end
 
