@@ -141,6 +141,7 @@ local function createDungeon()
         }
     })
 end
+
 local function addUltimateRune() fireDungeonEvent({ { { ["Dungeon"] = fixedDungeonID, ["Action"] = "AddItems", ["Slot"] = 1, ["Event"] = "DungeonAction", ["Item"] = "DgURankUpRune" }, "\n" } }) end
 
 local function startDungeon()
