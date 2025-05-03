@@ -120,12 +120,31 @@ local function isInDungeonGame() local success, result = pcall(function() return
 
 local function buyDungeonTicket() fireDungeonEvent({ { { ["Type"] = "Gems", ["Event"] = "DungeonAction", ["Action"] = "BuyTicket" }, "\n" } }) end
 
-local function createDungeon() fireDungeonEvent({ { { ["Event"] = "DungeonAction", ["Action"] = "Create" }, "\n" } }) end
-
+local function createDungeon()
+    fireDungeonEvent({
+        {
+            {
+                Event = "DungeonAction",
+                Action = "Create"
+            },
+            "\011"
+        }
+    })
+end
 local function addUltimateRune() fireDungeonEvent({ { { ["Dungeon"] = fixedDungeonID, ["Action"] = "AddItems", ["Slot"] = 1, ["Event"] = "DungeonAction", ["Item"] = "DgURankUpRune" }, "\n" } }) end
 
-local function startDungeon() fireDungeonEvent({ { { ["Dungeon"] = fixedDungeonID, ["Event"] = "DungeonAction", ["Action"] = "Start" }, "\n" } }) end
-
+local function startDungeon()
+    fireDungeonEvent({
+        {
+            {
+                Dungeon = fixedDungeonID,
+                Event = "DungeonAction",
+                Action = "Start"
+            },
+            "\011"
+        }
+    })
+end
 local function tryJoinCastle() local minute = os.date("*t").min if minute >= 45 and minute <= 59 and not isInDungeonGame() then fireDungeonEvent({ { { ["Event"] = "JoinCastle" }, "\n" } }) notify("Castle Join", "You have joined the castle event!", 5) return true else notify("Castle Join Skipped", "Not within Castle join time window (XX:45 - XX:59).", 5) return false end end
 
 function runDungeonBypass() local success, err = pcall(function() if isInDungeonGame() then notify("Dungeon Running", "You are already in a dungeon!", 5) return end if autoCastle and tryJoinCastle() then return end if autoJoinJay and player.Name ~= targetUser then for _, p in pairs(Players:GetPlayers()) do if p.Name == targetUser then while Players:FindFirstChild(targetUser) do buyDungeonTicket() task.wait(delay) fireDungeonEvent({ { { ["Dungeon"] = fixedDungeonID, ["Event"] = "DungeonAction", ["Action"] = "Join" }, "\n" } }) task.wait(1.5) end return end end end buyDungeonTicket() task.wait(delay) createDungeon() task.wait(delay) if ultimateDungeon then addUltimateRune() task.wait(delay) end startDungeon() notify("Dungeon Started", "Dungeon started with ID: " .. fixedDungeonID .. (ultimateDungeon and " + Rune!" or "!"), 5) end) if not success then notify("Error", "Something went wrong: " .. tostring(err), 6) end end
