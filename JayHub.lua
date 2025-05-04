@@ -561,30 +561,29 @@ local Dropdown = Tabs.Teleport:AddDropdown("Dropdown", {
 })
 
 Tabs.Teleport:AddButton({
-    Title = "Teleport",
-    Description = "Teleport to the selected island.",
-    Callback = function()
-        local selectedIsland = Dropdown.Value
-        local spawnLocation = spawnMap[selectedIsland]
+Title = "Teleport",
+Description = "Teleport to the selected island.",
+Callback = function()
+    local selectedIsland = Dropdown.Value
+    local spawnLocation = spawnMap[selectedIsland]
 
-        if spawnLocation then
-                fireDungeonEvent({
-                        {
-                            {
-                                Event = "ChangeSpawn",
-                                Spawn = spawnLocation
-                            },
-                            "\011"
-                        }
-                    })
-            end
-
-            local player = game:GetService("Players").LocalPlayer
-            if player.Character then
-                player.Character:BreakJoints()
-            end
-        end
+    if spawnLocation then
+        fireDungeonEvent({
+            {
+                {
+                    Event = "ChangeSpawn",
+                    Spawn = spawnLocation
+                },
+                "\011"
+            }
+        })
     end
+
+    local player = game:GetService("Players").LocalPlayer
+    if player.Character then
+        player.Character:BreakJoints()
+    end
+end
 })
 
 SaveManager:SetLibrary(jay)
