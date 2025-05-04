@@ -109,7 +109,8 @@ local spawnMap = {
     ["Nipon City"] = "ChainsawWorld",
     ["Jojo City"] = "JojoWorld",
     ["Dragon City"] = "DBWorld",
-    ["Punch City"] = "OPMWorld"
+    ["Punch City"] = "OPMWorld",
+    ["Dandadan City"] = "DanWorld"
 }
 
 local function fireDungeonEvent(argsTable) dataRemoteEvent:FireServer(unpack(argsTable)) end
@@ -554,7 +555,8 @@ local Dropdown = Tabs.Teleport:AddDropdown("Dropdown", {
         "Nipon City", 
         "Jojo City",
         "Dragon City",
-        "Punch City"
+        "Punch City",
+        "Dandadan City"
     },
     Multi = false,
     Default = 1
