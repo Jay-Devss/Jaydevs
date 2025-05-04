@@ -568,16 +568,16 @@ Tabs.Teleport:AddButton({
         local spawnLocation = spawnMap[selectedIsland]
 
         if spawnLocation then
-            local args = {
-                [1] = {
-                    [1] = {
-                        ["Event"] = "ChangeSpawn",
-                        ["Spawn"] = spawnLocation
-                    },
-                    [2] = "\n"
-                }
-            }
-            game:GetService("ReplicatedStorage"):WaitForChild("BridgeNet2"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                fireDungeonEvent({
+                        {
+                            {
+                                Event = "ChangeSpawn",
+                                Spawn = spawnLocation
+                            },
+                            "\011"
+                        }
+                    })
+            end
 
             local player = game:GetService("Players").LocalPlayer
             if player.Character then
