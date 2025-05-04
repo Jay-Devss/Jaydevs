@@ -609,7 +609,7 @@ IslandSection:AddButton({
             player.Character:BreakJoints()
         end
 
-        task.delay(4, function()
+        task.delay(6, function()
             local TweenService = game:GetService("TweenService")
 
             local targetCFrame = CFrame.new(
