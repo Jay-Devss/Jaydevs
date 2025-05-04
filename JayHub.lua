@@ -588,6 +588,48 @@ Callback = function()
 end
 })
 
+local IslandSection = Tabs.Teleport:AddSection("Island Teleport")
+
+
+IslandSection:AddButton({
+    Title = "Teleport to Winter Island",
+    Callback = function()
+        fireDungeonEvent({
+            {
+                {
+                    Event = "ChangeSpawn",
+                    Spawn = "JojoWorld"
+                },
+                "\011"
+            }
+        })
+
+        local player = game:GetService("Players").LocalPlayer
+        if player.Character then
+            player.Character:BreakJoints()
+        end
+
+        task.delay(3, function()
+            local TweenService = game:GetService("TweenService")
+
+            local targetCFrame = CFrame.new(
+                4759.65625, 29.7264366, -2014.11768,
+                0.999825656, -2.80905277e-09, -0.0186712835,
+                3.26758465e-09, 1, 2.45276315e-08,
+                0.0186712835, -2.45843665e-08, 0.999825656
+            )
+
+            repeat task.wait() until player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            local hrp = player.Character.HumanoidRootPart
+
+            local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
+            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
+            tween:Play()
+        end)
+    end
+})
+
+
 SaveManager:SetLibrary(jay)
 InterfaceManager:SetLibrary(jay)
 SaveManager:IgnoreThemeSettings()
