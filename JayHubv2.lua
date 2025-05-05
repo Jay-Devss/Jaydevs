@@ -161,6 +161,8 @@ local displayNames = {
 
 local function notify(title, content, duration) jay:Notify({ Title = title, Content = content, Duration = duration or 4 }) end
 
+local function fireDungeonEvent(argsTable) dataRemoteEvent:FireServer(unpack(argsTable)) end
+
 local function isCityRune(displayName)
     return string.find(displayName:lower(), "city")
 end
@@ -219,8 +221,6 @@ local function validateSelectedRunes()
 
     return true, validRunes
 end
-
-local function fireDungeonEvent(argsTable) dataRemoteEvent:FireServer(unpack(argsTable)) end
 
 local function isInDungeonGame() local success, result = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId).Name end) return success and string.find(result, "Dungeon") ~= nil end
 
