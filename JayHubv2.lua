@@ -281,10 +281,6 @@ function runDungeonBypass()
             return
         end
 
-        if autoCastle and tryJoinCastle() then
-            return
-        end
-
         buyDungeonTicket()
         task.wait(delay)
         createDungeon()
