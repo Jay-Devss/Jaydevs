@@ -91,10 +91,10 @@ TextButton.MouseButton1Click:Connect(function()
 end)
 
 local Tabs = {
-    Info = Window:AddTab({ Title = "Info", Icon = "notebook" }),
+    Info = Window:AddTab({ Title = "Info", Icon = "heart"}),
     Main = Window:AddTab({ Title = "Main", Icon = "align-justify" }),
     Dungeon = Window:AddTab({ Title = "Dungeon", Icon = "heart" }),
-    Rune = Window:AddTab({Title = "Rune", Icon = "sparkles" }),
+    Rune = Window:AddTab({Title = "Rune", Icon = "sparkles"}),
     Teleport = Window:AddTab({ Title = "Teleport", Icon = "map-pin" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
@@ -159,14 +159,10 @@ local displayNames = {
     "Xz City Rune",
 }
 
--- Notifications and Error Handling
-local function notify(title, content, duration)
-    jay:Notify({ Title = title, Content = content, Duration = duration or 4 })
-end
+local function notify(title, content, duration) jay:Notify({ Title = title, Content = content, Duration = duration or 4 }) end
 
--- Dungeon Events
-local function fireDungeonEvent(argsTable)
-    dataRemoteEvent:FireServer(unpack(argsTable))
+local function isCityRune(displayName)
+    return string.find(displayName:lower(), "city")
 end
 
 local function leaveDungeon()
@@ -180,49 +176,6 @@ local function leaveDungeon()
             "\011"
         }
     })
-end
-
-local function buyDungeonTicket()
-    fireDungeonEvent({
-        {
-            {
-                Type = "Gems",
-                Event = "DungeonAction",
-                Action = "BuyTicket"
-            },
-            "\011"
-        }
-    })
-end
-
-local function createDungeon()
-    fireDungeonEvent({
-        {
-            {
-                Event = "DungeonAction",
-                Action = "Create"
-            },
-            "\011"
-        }
-    })
-end
-
-local function startDungeon()
-    fireDungeonEvent({
-        {
-            {
-                Dungeon = fixedDungeonID,
-                Event = "DungeonAction",
-                Action = "Start"
-            },
-            "\011"
-        }
-    })
-end
-
--- Rune Validation
-local function isCityRune(displayName)
-    return string.find(displayName:lower(), "city")
 end
 
 local function validateSelectedRunes()
@@ -267,17 +220,58 @@ local function validateSelectedRunes()
     return true, validRunes
 end
 
--- Dungeon State Check
-local function isInDungeonGame()
-    local success, result = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId).Name end)
-    return success and string.find(result, "Dungeon") ~= nil
+local function fireDungeonEvent(argsTable) dataRemoteEvent:FireServer(unpack(argsTable)) end
+
+local function isInDungeonGame() local success, result = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId).Name end) return success and string.find(result, "Dungeon") ~= nil end
+
+local function buyDungeonTicket()
+    fireDungeonEvent({
+        {
+            {
+                Type = "Gems",
+                Event = "DungeonAction",
+                Action = "BuyTicket"
+            },
+            "\011"
+        }
+    })
 end
 
--- Run Dungeon Bypass Logic
+local function createDungeon()
+    fireDungeonEvent({
+        {
+            {
+                Event = "DungeonAction",
+                Action = "Create"
+            },
+            "\011"
+        }
+    })
+end
+
+
+local function startDungeon()
+    fireDungeonEvent({
+        {
+            {
+                Dungeon = fixedDungeonID,
+                Event = "DungeonAction",
+                Action = "Start"
+            },
+            "\011"
+        }
+    })
+end
+
+
 function runDungeonBypass()
     local success, err = pcall(function()
         if isInDungeonGame() then
             notify("Dungeon Running", "You are already in a dungeon!", 5)
+            return
+        end
+
+        if autoCastle and tryJoinCastle() then
             return
         end
 
@@ -303,10 +297,10 @@ function runDungeonBypass()
                         "\011"
                     }
                 })
-                task.wait(0.2)
+                task.wait(0.5)
             end
         end
-        task.wait(delay)
+
         startDungeon()
         notify("Dungeon Started", "Joining on dungeon...", 5)
     end)
@@ -316,22 +310,17 @@ function runDungeonBypass()
     end
 end
 
--- Get Dungeon Info Label
-local function getDungeonInfoLabel()
-    local playerGui = player:FindFirstChild("PlayerGui")
-    local hud = playerGui and playerGui:FindFirstChild("Hud")
-    local upContainer = hud and hud:FindFirstChild("UpContanier")
-    local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo")
-    local text = dungeonInfo and dungeonInfo:FindFirstChild("TextLabel")
-    return text
+local function getDungeonInfoLabel() 
+  local playerGui = player:FindFirstChild("PlayerGui") 
+  local hud = playerGui and playerGui:FindFirstChild("Hud") 
+  local upContainer = hud and hud:FindFirstChild("UpContanier") 
+  local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo") 
+  local text = dungeonInfo and dungeonInfo:FindFirstChild("TextLabel")
+  return text 
 end
 
--- Dungeon Text Management
-local function DungeonText()
-    if skipDoubleDungeon then return "Dungeon Ends in 20s" else return "Dungeon Ends in 12s" end
-end
+local function DungeonText() if skipDoubleDungeon then return "Dungeon Ends in 20s" else return "Dungeon Ends in 12s" end end
 
--- Auto Dungeon Action
 local function autoDungeonAction()
     task.spawn(function()
         while dungeonAction ~= "None" do
@@ -373,10 +362,10 @@ local function autoDungeonAction()
                                         "\011"
                                     }
                                 })
-                                task.wait(0.2)
+                                task.wait(0.5)
                             end
                         end
-                        task.wait(delay)
+
                         startDungeon()
                         task.wait(1)
                         dungeonAction = "None"
@@ -389,7 +378,6 @@ local function autoDungeonAction()
     end)
 end
 
--- Player Movement and Combat
 local function FreezePlayer(state)
     if character and character:FindFirstChild("Humanoid") then
         character.Humanoid.AutoRotate = not state
@@ -481,7 +469,6 @@ local function IsNPCDead(npc)
     return success and hp == 0
 end
 
--- Auto Rejoin and Combat Loops
 player.CharacterAdded:Connect(function(char)
     character = char
     humanoidRootPart = char:WaitForChild("HumanoidRootPart")
@@ -543,20 +530,60 @@ task.spawn(function()
     while ariseDestroyType do
         if lastDeadNPC then
             FireAriseDestroy(lastDeadNPC.Name)
-            task.wait(0.3)
+            lastDeadNPC = nil
         end
+        task.wait()
     end
 end)
 
+local VirtualUser = game:GetService("VirtualUser")
+game:GetService("Players").LocalPlayer.Idled:Connect(function()
+    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
+
+task.spawn(function()
+    while true do
+        if isActive and character and character:FindFirstChild("Humanoid") then
+            if character.Humanoid.Sit then
+                character.Humanoid.Sit = false
+            end
+        end
+        task.wait(0.1)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if isActive and humanoidRootPart then
+            humanoidRootPart.Anchored = false
+            humanoidRootPart.Velocity = Vector3.zero
+        end
+        task.wait(0.5)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        if isActive and currentTarget and targetCFramePosition then
+            local distance = (humanoidRootPart.Position - targetCFramePosition).Magnitude
+            if distance > 5 then
+                MoveToCFrame(currentTarget)
+            end
+        end
+        task.wait(1)
+    end
+end)
 
 Tabs.Info:AddParagraph({
-    Title = "Welcome to Jay Hub!",
+    Title = "Welcome to Jay Hub",
     Content = "Thank you for using our script! We appreciate your support and hope it helps you have a smoother experience. If you have any questions, feel free to reach out!\nMore featuress to come!"
 })
 
 Tabs.Info:AddParagraph({
     Title = "Update Log",
-    Content = "New:\n+ Add runes available (you can now choose your own runes in dungeon)\n+ New Tab info\n+ New Teleport button (teleport to Winter Island)\n\nRemove:\n- No more Join Jay Option\n- Removed Ultimate Rune feature\n\nFixed:\n+ Not teleporting to selected Island\n+ Not starting dungeon\n+ Not punching\n+ Not working Arise/Destroy option"
+    Content = "New:\n+ Add runes available (you can now choose your own runes in dungeon)\n+ New Tab info\n+ New Teleport button (teleport to Winter Island)\n\nRemove:\n- No more Join Jay\n- Removed Ultimate Rune feature\n\nFixed:\n+ Not teleporting to selected Island\n+ Not starting dungeon\n+ Not punching\n+ Not working Arise/Destroy option\n\nNote:\nRework in script is in progress. Stay tuned for more improvements!"
 })
 
 local Config = Tabs.Main:AddSection("Config")
@@ -736,7 +763,7 @@ Tabs.Teleport:AddButton({
 end
 })
 
-local IslandSection = Tabs.Teleport:AddSection("Event Island Teleport")
+local IslandSection = Tabs.Teleport:AddSection("Island Teleport")
 
 
 IslandSection:AddButton({
