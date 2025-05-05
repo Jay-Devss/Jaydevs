@@ -91,10 +91,10 @@ TextButton.MouseButton1Click:Connect(function()
 end)
 
 local Tabs = {
-    Info = Window:AddTab({ Title = "Info", Icon = "heart"}),
+    Info = Window:AddTab({ Title = "Info", Icon = "bookmark"}),
     Main = Window:AddTab({ Title = "Main", Icon = "align-justify" }),
     Dungeon = Window:AddTab({ Title = "Dungeon", Icon = "heart" }),
-    Rune = Window:AddTab({Title = "Rune", Icon = "sparkles"}),
+    Rune = Window:AddTab({Title = "Rune", Icon = "badge"}),
     Teleport = Window:AddTab({ Title = "Teleport", Icon = "map-pin" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
