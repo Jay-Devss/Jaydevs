@@ -581,9 +581,16 @@ Tabs.Info:AddParagraph({
     Content = "Thank you for using our script! We appreciate your support and hope it helps you have a smoother experience. If you have any questions, feel free to reach out!\nMore featuress to come!"
 })
 
-Tabs.Info:AddParagraph({
+local UpdateSection = Tabs.Info:AddSection("Update List")
+
+UpdateSection:AddParagraph({
+    Title = "Update Log - Version 1.0.1",
+    Content = "New:\n+ Add runes available (you can now choose your own runes in dungeon)\n+ New Tab info\n+ New Teleport button (teleport to Winter Island)\n\nRemove:\n- No more Join Jay\n- Removed Ultimate Rune feature\n\nNote:\nRework in script is in progress. Stay tuned for more improvements!"
+})
+
+UpdateSection:AddParagraph({
     Title = "Update Log - Version 1.0.0",
-    Content = "New:\n+ Add runes available (you can now choose your own runes in dungeon)\n+ New Tab info\n+ New Teleport button (teleport to Winter Island)\n\nRemove:\n- No more Join Jay\n- Removed Ultimate Rune feature\n\nFixed:\n+ Not teleporting to selected Island\n+ Not starting dungeon\n+ Not punching\n+ Not working Arise/Destroy option\n\nNote:\nRework in script is in progress. Stay tuned for more improvements!"
+    Content = "Fixed:\n+ Not teleporting to selected Island\n+ Not starting dungeon\n+ Not punching\n+Not working Arise/Destroy option",
 })
 
 local Config = Tabs.Main:AddSection("Config")
@@ -651,7 +658,8 @@ Tabs.Dungeon:AddSlider("TpDelaySlider", {
 })
 
 Tabs.Dungeon:AddSlider("DelaySlider", {
-    Title = "Delay (Seconds)",
+    Title = "Action Delay (Seconds)",
+    Description = "Action delay for Joining on Dungeon",
     Default = delay,
     Min = 0.1,
     Max = 3,
@@ -662,10 +670,10 @@ Tabs.Dungeon:AddSlider("DelaySlider", {
     end
 })
 
-local BypassSection = Tabs.Dungeon:AddSection("Bypass Section")
+local BypassSection = Tabs.Dungeon:AddSection("Dungeon Section")
 
 BypassSection:AddToggle("AutoBypassToggle", {
-    Title = "Auto Dungeon Bypass",
+    Title = "Auto Join Dungeon",
     Default = autoBypass,
     Callback = function(val)
         autoBypass = val
