@@ -94,7 +94,7 @@ local Tabs = {
     Info = Window:AddTab({ Title = "Info", Icon = "bookmark"}),
     Main = Window:AddTab({ Title = "Main", Icon = "align-justify" }),
     Dungeon = Window:AddTab({ Title = "Dungeon", Icon = "heart" }),
-    Rune = Window:AddTab({Title = "Rune", Icon = "badge"}),
+    Rune = Window:AddTab({Title = "Rune", Icon = "circle-alert" }),
     Teleport = Window:AddTab({ Title = "Teleport", Icon = "map-pin" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
@@ -582,7 +582,7 @@ Tabs.Info:AddParagraph({
 })
 
 Tabs.Info:AddParagraph({
-    Title = "Update Log",
+    Title = "Update Log - Version 1.0.0",
     Content = "New:\n+ Add runes available (you can now choose your own runes in dungeon)\n+ New Tab info\n+ New Teleport button (teleport to Winter Island)\n\nRemove:\n- No more Join Jay\n- Removed Ultimate Rune feature\n\nFixed:\n+ Not teleporting to selected Island\n+ Not starting dungeon\n+ Not punching\n+ Not working Arise/Destroy option\n\nNote:\nRework in script is in progress. Stay tuned for more improvements!"
 })
 
