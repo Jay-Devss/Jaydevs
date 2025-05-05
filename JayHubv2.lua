@@ -162,419 +162,416 @@ local displayNames = {
 local function notify(title, content, duration) jay:Notify({ Title = title, Content = content, Duration = duration or 4 }) end
 
 local function isCityRune(displayName)
-    return string.find(displayName:lower(), "city")
+    return string.find(displayName:lower(), "city")
 end
 
 local function fireDungeonEvent(argsTable) dataRemoteEvent:FireServer(unpack(argsTable)) end
 
 local function leaveDungeon()
-    fireDungeonEvent({
-        {
-            {
-                Dungeon = fixedDungeonID,
-                Event = "DungeonAction",
-                Action = "Leave"
-            },
-            "\011"
-        }
-    })
+    fireDungeonEvent({
+        {
+            {
+                Dungeon = fixedDungeonID,
+                Event = "DungeonAction",
+                Action = "Leave"
+            },
+            "\011"
+        }
+    })
 end
 
 local function isInDungeonGame() local success, result = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId).Name end) return success and string.find(result, "Dungeon") ~= nil end
 
 local function validateSelectedRunes()
-    local inventory = player:FindFirstChild("leaderstats"):FindFirstChild("Inventory"):FindFirstChild("Items")
-    if not inventory then
-        notify("Error", "Inventory not found.", 5)
-        leaveDungeon()
-        return false, nil
-    end
+    local inventory = player:FindFirstChild("leaderstats"):FindFirstChild("Inventory"):FindFirstChild("Items")
+    if not inventory then
+        notify("Error", "Inventory not found.", 5)
+        leaveDungeon()
+        return false, nil
+    end
 
-    local usedCityRune = false
-    local validRunes = {}
+    local usedCityRune = false
+    local validRunes = {}
 
-    for slot = 1, 7 do
-        local displayName = selectedRunes[slot]
-        if not displayName or displayName == "None" then
-            continue
-        end
+    for slot = 1, 7 do
+        local displayName = selectedRunes[slot]
+        if not displayName or displayName == "None" then
+            continue
+        end
 
-        local runeID = runeMap[displayName]
-        if not runeID then continue end
+        local runeID = runeMap[displayName]
+        if not runeID then continue end
 
-        local hasRune = inventory:FindFirstChild(runeID)
-        if not hasRune then
-            notify("Invalid Rune", "You don't own: " .. displayName .. " (Slot " .. slot .. ")", 5)
-            leaveDungeon()
-            return false, nil
-        end
+        local hasRune = inventory:FindFirstChild(runeID)
+        if not hasRune then
+            notify("Invalid Rune", "You don't own: " .. displayName .. " (Slot " .. slot .. ")", 5)
+            leaveDungeon()
+            return false, nil
+        end
 
-        if isCityRune(displayName) then
-            if usedCityRune then
-                notify("Invalid Rune Selection", "You can only use one City rune. Please remove one.", 5)
-                leaveDungeon()
-                return false, nil
-            end
-            usedCityRune = true
-        end
+        if isCityRune(displayName) then
+            if usedCityRune then
+                notify("Invalid Rune Selection", "You can only use one City rune. Please remove one.", 5)
+                leaveDungeon()
+                return false, nil
+            end
+            usedCityRune = true
+        end
 
-        validRunes[slot] = runeID
-    end
+        validRunes[slot] = runeID
+    end
 
-    return true, validRunes
+    return true, validRunes
 end
 
 local function buyDungeonTicket()
-    fireDungeonEvent({
-        {
-            {
-                Type = "Gems",
-                Event = "DungeonAction",
-                Action = "BuyTicket"
-            },
-            "\011"
-        }
-    })
+    fireDungeonEvent({
+        {
+            {
+                Type = "Gems",
+                Event = "DungeonAction",
+                Action = "BuyTicket"
+            },
+            "\011"
+        }
+    })
 end
 
 local function createDungeon()
-    fireDungeonEvent({
-        {
-            {
-                Event = "DungeonAction",
-                Action = "Create"
-            },
-            "\011"
-        }
-    })
+    fireDungeonEvent({
+        {
+            {
+                Event = "DungeonAction",
+                Action = "Create"
+            },
+            "\011"
+        }
+    })
 end
 
 
 local function startDungeon()
-    fireDungeonEvent({
-        {
-            {
-                Dungeon = fixedDungeonID,
-                Event = "DungeonAction",
-                Action = "Start"
-            },
-            "\011"
-        }
-    })
+    fireDungeonEvent({
+        {
+            {
+                Dungeon = fixedDungeonID,
+                Event = "DungeonAction",
+                Action = "Start"
+            },
+            "\011"
+        }
+    })
 end
 
 
 function runDungeonBypass()
-    local success, err = pcall(function()
-        if isInDungeonGame() then
-            notify("Dungeon Running", "You are already in a dungeon!", 5)
-            return
-        end
+    local success, err = pcall(function()
+        if isInDungeonGame() then
+            notify("Dungeon Running", "You are already in a dungeon!", 5)
+            return
+        end
 
-        if autoCastle and tryJoinCastle() then
-            return
-        end
+        buyDungeonTicket()
+        task.wait(delay)
+        createDungeon()
+        task.wait(delay)
 
-        buyDungeonTicket()
-        task.wait(delay)
-        createDungeon()
-        task.wait(delay)
+        if addRunes then
+            local isValid, validRunes = validateSelectedRunes()
+            if not isValid then return end
 
-        if addRunes then
-            local isValid, validRunes = validateSelectedRunes()
-            if not isValid then return end
+            for slot, runeID in pairs(validRunes) do
+                fireDungeonEvent({
+                    {
+                        {
+                            Dungeon = fixedDungeonID,
+                            Action = "AddItems",
+                            Slot = slot,
+                            Event = "DungeonAction",
+                            Item = runeID
+                        },
+                        "\011"
+                    }
+                })
+                task.wait(0.2)
+            end
+        end
+        task.wait(delay)
+        startDungeon()
+        notify("Dungeon Started", "Joining on dungeon...", 5)
+    end)
 
-            for slot, runeID in pairs(validRunes) do
-                fireDungeonEvent({
-                    {
-                        {
-                            Dungeon = fixedDungeonID,
-                            Action = "AddItems",
-                            Slot = slot,
-                            Event = "DungeonAction",
-                            Item = runeID
-                        },
-                        "\011"
-                    }
-                })
-                task.wait(0.2)
-            end
-        end
-        task.wait(delay)
-        startDungeon()
-        notify("Dungeon Started", "Joining on dungeon...", 5)
-    end)
-
-    if not success then
-        notify("Error", "Something went wrong: " .. tostring(err), 6)
-    end
+    if not success then
+        notify("Error", "Something went wrong: " .. tostring(err), 6)
+    end
 end
 
 
-local function getDungeonInfoLabel() 
-  local playerGui = player:FindFirstChild("PlayerGui") 
-  local hud = playerGui and playerGui:FindFirstChild("Hud") 
-  local upContainer = hud and hud:FindFirstChild("UpContanier") 
-  local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo") 
-  local text = dungeonInfo and dungeonInfo:FindFirstChild("TextLabel")
-  return text 
+local function getDungeonInfoLabel() 
+  local playerGui = player:FindFirstChild("PlayerGui") 
+  local hud = playerGui and playerGui:FindFirstChild("Hud") 
+  local upContainer = hud and hud:FindFirstChild("UpContanier") 
+  local dungeonInfo = upContainer and upContainer:FindFirstChild("DungeonInfo") 
+  local text = dungeonInfo and dungeonInfo:FindFirstChild("TextLabel")
+  return text 
 end
 
 local function DungeonText() if skipDoubleDungeon then return "Dungeon Ends in 20s" else return "Dungeon Ends in 12s" end end
 
 local function autoDungeonAction()
-    task.spawn(function()
-        while dungeonAction ~= "None" do
-            pcall(function()
-                local dungeonInfo = getDungeonInfoLabel()
-                if dungeonInfo and dungeonInfo.Text == DungeonText() then
-                    if dungeonAction == "Leave" then
-                        VirtualInputManager:SendKeyEvent(true, "BackSlash", false, game)
-                        VirtualInputManager:SendKeyEvent(false, "BackSlash", false, game)
-                        task.wait(0.5)
-                        VirtualInputManager:SendKeyEvent(true, "Right", false, game)
-                        VirtualInputManager:SendKeyEvent(false, "Right", false, game)
-                        task.wait(0.5)
-                        for _ = 1, 3 do
-                            VirtualInputManager:SendKeyEvent(true, "Return", false, game)
-                            VirtualInputManager:SendKeyEvent(false, "Return", false, game)
-                            task.wait(0.2)
-                        end
-                    elseif dungeonAction == "Rejoin" then
-                        buyDungeonTicket()
-                        task.wait(delay)
-                        createDungeon()
-                        task.wait(delay)
+    task.spawn(function()
+        while dungeonAction ~= "None" do
+            pcall(function()
+                local dungeonInfo = getDungeonInfoLabel()
+                if dungeonInfo and dungeonInfo.Text == DungeonText() then
+                    if dungeonAction == "Leave" then
+                        VirtualInputManager:SendKeyEvent(true, "BackSlash", false, game)
+                        VirtualInputManager:SendKeyEvent(false, "BackSlash", false, game)
+                        task.wait(0.5)
+                        VirtualInputManager:SendKeyEvent(true, "Right", false, game)
+                        VirtualInputManager:SendKeyEvent(false, "Right", false, game)
+                        task.wait(0.5)
+                        for _ = 1, 3 do
+                            VirtualInputManager:SendKeyEvent(true, "Return", false, game)
+                            VirtualInputManager:SendKeyEvent(false, "Return", false, game)
+                            task.wait(0.2)
+                        end
+                    elseif dungeonAction == "Rejoin" then
+                        buyDungeonTicket()
+                        task.wait(delay)
+                        createDungeon()
+                        task.wait(delay)
 
-                        if addRunes then
-                            local isValid, validRunes = validateSelectedRunes()
-                            if not isValid then return end
+                        if addRunes then
+                            local isValid, validRunes = validateSelectedRunes()
+                            if not isValid then return end
 
-                            for slot, runeID in pairs(validRunes) do
-                                fireDungeonEvent({
-                                    {
-                                        {
-                                            Dungeon = fixedDungeonID,
-                                            Action = "AddItems",
-                                            Slot = slot,
-                                            Event = "DungeonAction",
-                                            Item = runeID
-                                        },
-                                        "\011"
-                                    }
-                                })
-                                task.wait(0.2)
-                            end
-                        end
-                        task.wait(delay)
-                        startDungeon()
-                        task.wait(1)
-                        dungeonAction = "None"
-                        return
-                    end
-                end
-            end)
-            task.wait(0.5)
-        end
-    end)
+                            for slot, runeID in pairs(validRunes) do
+                                fireDungeonEvent({
+                                    {
+                                        {
+                                            Dungeon = fixedDungeonID,
+                                            Action = "AddItems",
+                                            Slot = slot,
+                                            Event = "DungeonAction",
+                                            Item = runeID
+                                        },
+                                        "\011"
+                                    }
+                                })
+                                task.wait(0.2)
+                            end
+                        end
+                        task.wait(delay)
+                        startDungeon()
+                        task.wait(1)
+                        dungeonAction = "None"
+                        return
+                    end
+                end
+            end)
+            task.wait(0.5)
+        end
+    end)
 end
 
 local function FreezePlayer(state)
-    if character and character:FindFirstChild("Humanoid") then
-        character.Humanoid.AutoRotate = not state
-        character.Humanoid.WalkSpeed = state and 0 or 16
-    end
+    if character and character:FindFirstChild("Humanoid") then
+        character.Humanoid.AutoRotate = not state
+        character.Humanoid.WalkSpeed = state and 0 or 16
+    end
 end
 
 local function GetAllLivingNPCs()
-    local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
-    if not serverFolder then return end
-    for _, npc in pairs(serverFolder:GetChildren()) do
-        if npc:IsA("BasePart") then
-            local name = npc.Name
-            if not LivingNPCs[name] then
-                LivingNPCs[name] = npc
-            end
-        end
-    end
+    local serverFolder = workspace:FindFirstChild("__Main") and workspace.__Main:FindFirstChild("__Enemies") and workspace.__Main.__Enemies:FindFirstChild("Server")
+    if not serverFolder then return end
+    for _, npc in pairs(serverFolder:GetChildren()) do
+        if npc:IsA("BasePart") then
+            local name = npc.Name
+            if not LivingNPCs[name] then
+                LivingNPCs[name] = npc
+            end
+        end
+    end
 end
 
 local function GetNearbyPosition(npc)
-    local hitboxRadius = 3
-    local npcPos = npc.CFrame.Position
-    local direction = (humanoidRootPart.Position - npcPos).Unit
-    local offsetDistance = hitboxRadius + math.random(1, 3)
-    return npcPos + (direction * offsetDistance)
+    local hitboxRadius = 3
+    local npcPos = npc.CFrame.Position
+    local direction = (humanoidRootPart.Position - npcPos).Unit
+    local offsetDistance = hitboxRadius + math.random(1, 3)
+    return npcPos + (direction * offsetDistance)
 end
 
 local function MoveToCFrame(npc)
-    local targetPosition = GetNearbyPosition(npc)
-    targetCFramePosition = targetPosition
-    local targetCFrame = CFrame.new(targetPosition)
+    local targetPosition = GetNearbyPosition(npc)
+    targetCFramePosition = targetPosition
+    local targetCFrame = CFrame.new(targetPosition)
 
-    if useTween then
-        if tween then tween:Cancel() end
-        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-        local duration = math.clamp(distance / tweenSpeed, 0.05, 1)
-        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
-        tween:Play()
-    else
-        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-        if distance <= 20 then
-            player.Character:PivotTo(targetCFrame)
-        else
-            if tween then tween:Cancel() end
-            local duration = math.clamp(distance / 1000, 0.05, 0.15)
-            local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-            tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
-            tween:Play()
-        end
-    end
+    if useTween then
+        if tween then tween:Cancel() end
+        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+        local duration = math.clamp(distance / tweenSpeed, 0.05, 1)
+        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+        tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+        tween:Play()
+    else
+        local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+        if distance <= 20 then
+            player.Character:PivotTo(targetCFrame)
+        else
+            if tween then tween:Cancel() end
+            local duration = math.clamp(distance / 1000, 0.05, 0.15)
+            local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+            tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+            tween:Play()
+        end
+    end
 end
 
 local function FirePunch(npcName)
-    fireDungeonEvent({
-        {
-            {
-                Event = "PunchAttack",
-                Enemy = npcName
-            },
-            "\005"
-        }
-    })
+    fireDungeonEvent({
+        {
+            {
+                Event = "PunchAttack",
+                Enemy = npcName
+            },
+            "\005"
+        }
+    })
 end
 
 local function FireAriseDestroy(npcName)
-    if not autoAriseDestroy then return end
-    task.spawn(function()
-        for _ = 1, 3 do
-            fireDungeonEvent({
-                {
-                    {
-                        Event = ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
-                        Enemy = npcName
-                    },
-                    "\005"
-                }
-            })
-            task.wait(0.3)
-        end
-    end)
+    if not autoAriseDestroy then return end
+    task.spawn(function()
+        for _ = 1, 3 do
+            fireDungeonEvent({
+                {
+                    {
+                        Event = ariseDestroyType == "Destroy" and "EnemyDestroy" or "EnemyCapture",
+                        Enemy = npcName
+                    },
+                    "\005"
+                }
+            })
+            task.wait(0.3)
+        end
+    end)
 end
 
 local function IsNPCDead(npc)
-    local success, hp = pcall(function()
-        return npc:GetAttribute("HP")
-    end)
-    return success and hp == 0
+    local success, hp = pcall(function()
+        return npc:GetAttribute("HP")
+    end)
+    return success and hp == 0
 end
 
 player.CharacterAdded:Connect(function(char)
-    character = char
-    humanoidRootPart = char:WaitForChild("HumanoidRootPart")
+    character = char
+    humanoidRootPart = char:WaitForChild("HumanoidRootPart")
 end)
 
 task.spawn(function()
-    while true do
-        if isActive then
-            GetAllLivingNPCs()
-        end
-        task.wait(0.1)
-    end
+    while true do
+        if isActive then
+            GetAllLivingNPCs()
+        end
+        task.wait(0.1)
+    end
 end)
 
 task.spawn(function()
-    while true do
-        if isActive then
-            if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
-                if currentTarget and IsNPCDead(currentTarget) then
-                    lastDeadNPC = currentTarget
-                end
-                currentTarget = nil
-                for name, npc in pairs(LivingNPCs) do
-                    if npc and not IsNPCDead(npc) then
-                        currentTarget = npc
-                        FirePunch(name)
-                        if useTween then
-                            MoveToCFrame(npc)
-                        else
-                            task.wait(tp_delay)
-                            if currentTarget == npc then
-                                MoveToCFrame(npc)
-                            end
-                        end
-                        break
-                    end
-                end
-            end
-        end
-        task.wait()
-    end
+    while true do
+        if isActive then
+            if not currentTarget or not currentTarget:IsDescendantOf(workspace) or IsNPCDead(currentTarget) then
+                if currentTarget and IsNPCDead(currentTarget) then
+                    lastDeadNPC = currentTarget
+                end
+                currentTarget = nil
+                for name, npc in pairs(LivingNPCs) do
+                    if npc and not IsNPCDead(npc) then
+                        currentTarget = npc
+                        FirePunch(name)
+                        if useTween then
+                            MoveToCFrame(npc)
+                        else
+                            task.wait(tp_delay)
+                            if currentTarget == npc then
+                                MoveToCFrame(npc)
+                            end
+                        end
+                        break
+                    end
+                end
+            end
+        end
+        task.wait()
+    end
 end)
 
 task.spawn(function()
-    while true do
-        if isActive then
-            if currentTarget then
-                FreezePlayer(true)
-                FirePunch(currentTarget.Name)
-            end
-        else
-            FreezePlayer(false)
-        end
-        task.wait()
-    end
+    while true do
+        if isActive then
+            if currentTarget then
+                FreezePlayer(true)
+                FirePunch(currentTarget.Name)
+            end
+        else
+            FreezePlayer(false)
+        end
+        task.wait()
+    end
 end)
 
 task.spawn(function()
-    while ariseDestroyType do
-        if lastDeadNPC then
-            FireAriseDestroy(lastDeadNPC.Name)
-            lastDeadNPC = nil
-        end
-        task.wait()
-    end
+    while ariseDestroyType do
+        if lastDeadNPC then
+            FireAriseDestroy(lastDeadNPC.Name)
+            lastDeadNPC = nil
+        end
+        task.wait()
+    end
 end)
 
 local VirtualUser = game:GetService("VirtualUser")
 game:GetService("Players").LocalPlayer.Idled:Connect(function()
-    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    task.wait(1)
-    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 end)
 
 task.spawn(function()
-    while true do
-        if isActive and character and character:FindFirstChild("Humanoid") then
-            if character.Humanoid.Sit then
-                character.Humanoid.Sit = false
-            end
-        end
-        task.wait(0.1)
-    end
+    while true do
+        if isActive and character and character:FindFirstChild("Humanoid") then
+            if character.Humanoid.Sit then
+                character.Humanoid.Sit = false
+            end
+        end
+        task.wait(0.1)
+    end
 end)
 
 task.spawn(function()
-    while true do
-        if isActive and humanoidRootPart then
-            humanoidRootPart.Anchored = false
-            humanoidRootPart.Velocity = Vector3.zero
-        end
-        task.wait(0.5)
-    end
+    while true do
+        if isActive and humanoidRootPart then
+            humanoidRootPart.Anchored = false
+            humanoidRootPart.Velocity 
+= Vector3.zero
+        end
+        task.wait(0.5)
+    end
 end)
 
 task.spawn(function()
-    while true do
-        if isActive and currentTarget and targetCFramePosition then
-            local distance = (humanoidRootPart.Position - targetCFramePosition).Magnitude
-            if distance > 5 then
-                MoveToCFrame(currentTarget)
-            end
-        end
-        task.wait(1)
-    end
+    while true do
+        if isActive and currentTarget and targetCFramePosition then
+            local distance = (humanoidRootPart.Position - targetCFramePosition).Magnitude
+            if distance > 5 then
+                MoveToCFrame(currentTarget)
+            end
+        end
+        task.wait(1)
+    end
 end)
 
 Tabs.Info:AddParagraph({
