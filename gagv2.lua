@@ -1,5 +1,5 @@
 local HttpService = game:GetService("HttpService")
-local WebhookURL = "https://discord.com/api/webhooks/1068114147935522826/kX61hYF6wVSlueI1F9UpFvdPAe5zoe2hUtJSN4YlPUHe5sOgoAs6kU4BfLwPXxjsh8gs"
+local WebhookURL = "https://discord.com/api/webhooks/1370271793188966470/CDA4X38eZF0LbmpSZ46FMm58PRufKgiEDIBAMxeZWb8FSgnT9A_1vgaBtYOXa56Rqck5"
 
 local function getEggStock()
     local eggFolder = workspace:FindFirstChild("NPCS"):FindFirstChild("Pet Stand"):FindFirstChild("EggLocations")
