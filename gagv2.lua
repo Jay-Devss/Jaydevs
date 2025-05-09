@@ -22,7 +22,7 @@ end
 local function buildEggDescription(eggData)
     local desc = {}
     for _, egg in ipairs(eggData) do
-        table.insert(desc, string.format("**%s** - X%d Stock", egg.name, egg.count))
+        table.insert(desc, string.format("**%s**", egg.name))
     end
     return table.concat(desc, "\n")
 end
@@ -66,5 +66,3 @@ task.spawn(function()
         task.wait(0.5)
     end
 end)
-
-postEggStock()
