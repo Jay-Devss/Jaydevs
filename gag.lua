@@ -109,7 +109,7 @@ local timerText = seedShop:WaitForChild("Frame"):WaitForChild("Frame"):WaitForCh
 
 timerText:GetPropertyChangedSignal("Text"):Connect(function()
 	if timerText.Text == "New seeds in 0:00" then
-		task.wait(1)
+		task.wait(2)
 		postStock()
 	end
 end)
