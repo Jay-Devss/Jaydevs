@@ -10,8 +10,7 @@ local function getEggStock()
         if egg:IsA("Model") and egg.Name:match("Egg$") then
             local count = #egg:GetChildren()
             table.insert(eggData, {
-                name = egg.Name,
-                count = count
+                name = egg.Name
             })
         end
     end
