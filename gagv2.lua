@@ -22,7 +22,7 @@ end
 local function buildEggDescription(eggData)
     local desc = {}
     for _, egg in ipairs(eggData) do
-        table.insert(desc, string.format("**%s**", egg.name))
+        table.insert(desc, string.format("**%s** - X%d Stock", egg.name, egg.count))
     end
     return table.concat(desc, "\n")
 end
@@ -40,7 +40,7 @@ local function postEggStock()
         embeds = {{
             title = "🥚 Egg Stock Notifier",
             description = description,
-            color = 65280‎
+            color = 16753920
         }}
     }
 
@@ -54,17 +54,17 @@ local function postEggStock()
 end
 
 task.spawn(function()
-    local lastSentMinute = nil
+    local lastHour, lastMinute
     while true do
         local now = os.date("*t")
-        if (now.min == 0 or now.min == 30) and now.sec == 0 then
-            if lastSentMinute ~= now.min then
-                lastSentMinute = now.min
-                postEggStock()
-            end
-        elseif now.min ~= lastSentMinute then
-            lastSentMinute = nil
+        local min = now.min
+        if (min == 0 or min == 30) and (lastMinute ~= min or lastHour ~= now.hour) then
+            lastMinute = min
+            lastHour = now.hour
+            postEggStock()
         end
         task.wait(0.5)
     end
 end)
+
+postEggStock()
