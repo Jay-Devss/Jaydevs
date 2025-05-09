@@ -36,7 +36,7 @@ local function postEggStock()
     local data = {
         username = "NU_GAG-EGG_NOTIFIER",
         avatar_url = "https://i.ibb.co/Jjyfv3KX/akemiboi.jpg",
-        content = "@everyone 🥚 Egg stock restocked!",
+        content = "🥚 Egg stock restocked!",
         embeds = {{
             title = "🥚 Egg Stock Notifier",
             description = description,
