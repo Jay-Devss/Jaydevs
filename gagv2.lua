@@ -1,5 +1,5 @@
 local HttpService = game:GetService("HttpService")
-local WebhookURL = "https://discord.com/api/webhooks/1370271793188966470/CDA4X38eZF0LbmpSZ46FMm58PRufKgiEDIBAMxeZWb8FSgnT9A_1vgaBtYOXa56Rqck5"
+local WebhookURL = "https://discord.com/api/webhooks/1068114147935522826/kX61hYF6wVSlueI1F9UpFvdPAe5zoe2hUtJSN4YlPUHe5sOgoAs6kU4BfLwPXxjsh8gs"
 
 local function getEggStock()
     local eggFolder = workspace:FindFirstChild("NPCS"):FindFirstChild("Pet Stand"):FindFirstChild("EggLocations")
@@ -22,7 +22,7 @@ end
 local function buildEggDescription(eggData)
     local desc = {}
     for _, egg in ipairs(eggData) do
-        table.insert(desc, string.format("**%s** - X%d Stock", egg.name, egg.count))
+        table.insert(desc, string.format("**%s**", egg.name))
     end
     return table.concat(desc, "\n")
 end
@@ -40,7 +40,7 @@ local function postEggStock()
         embeds = {{
             title = "🥚 Egg Stock Notifier",
             description = description,
-            color = 16753920
+            color = 65280‎
         }}
     }
 
@@ -54,10 +54,17 @@ local function postEggStock()
 end
 
 task.spawn(function()
+    local lastSentMinute = nil
     while true do
-        postEggStock()
-        task.wait(1800)
+        local now = os.date("*t")
+        if (now.min == 0 or now.min == 30) and now.sec == 0 then
+            if lastSentMinute ~= now.min then
+                lastSentMinute = now.min
+                postEggStock()
+            end
+        elseif now.min ~= lastSentMinute then
+            lastSentMinute = nil
+        end
+        task.wait(0.5)
     end
 end)
-
-postEggStock()
