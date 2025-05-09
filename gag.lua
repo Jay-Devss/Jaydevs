@@ -78,21 +78,23 @@ local function postStock()
 	end
 
 	local data = {
-		["embeds"] = {{
-			["title"] = "🌱 Stock Notifier",
-			["description"] = description,
-			["fields"] = {
-				{
-					["name"] = "📦 Gear Stock",
-					["value"] = gearText ~= "" and gearText or "No gear in stock"
+		username = "NU_GAG-STOCK_NOTIFIER",
+		avatar_url = "https://i.ibb.co/Jjyfv3KX/akemiboi.jpg",
+		embeds = {{
+				title = "🌱 Stock Notifier",
+				description = description,
+				fields = {
+					{
+						name = "📦 Gear Stock",
+						value = gearText ~= "" and gearText or "No gear in stock"
+					},
+					{
+						name = "🌾 Seed Stock",
+						value = seedText ~= "" and seedText or "No seeds in stock"
+					}
 				},
-				{
-					["name"] = "🌾 Seed Stock",
-					["value"] = seedText ~= "" and seedText or "No seeds in stock"
-				}
-			},
-			["color"] = 65280
-		}}
+				color = 65280
+			}}
 	}
 
 	http({
