@@ -1,6 +1,4 @@
-local webhook = "https://discord.com/api/webhooks/1370271793188966470/CDA4X38eZF0LbmpSZ46FMm58PRufKgiEDIBAMxeZWb8FSgnT9A_1vgaBtYOXa56Rqck5"
 local http = request
-if not http then return warn("Exploit does not support HTTP requests.") end
 
 local rarityOrder = {
 	Common = 1, Uncommon = 2, Rare = 3,
@@ -98,7 +96,7 @@ local function postStock()
 	}
 
 	http({
-		Url = webhook,
+		Url = getgenv().webhook,
 		Method = "POST",
 		Headers = {["Content-Type"] = "application/json"},
 		Body = HttpService:JSONEncode(data)
