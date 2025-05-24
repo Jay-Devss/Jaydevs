@@ -3,7 +3,6 @@ local LocalPlayer = Players.LocalPlayer
 local Backpack = LocalPlayer:WaitForChild("Backpack")
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 
--- GUI Setup
 local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
 screenGui.Name = "JayDupeGui"
 screenGui.ResetOnSpawn = false
@@ -21,7 +20,6 @@ frame.Draggable = true
 local uiCorner = Instance.new("UICorner", frame)
 uiCorner.CornerRadius = UDim.new(0, 10)
 
--- Title Label
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, -40, 0, 25)
 title.Position = UDim2.new(0, 10, 0, 5)
@@ -32,7 +30,6 @@ title.Font = Enum.Font.SourceSansBold
 title.TextSize = 18
 title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Close Button
 local closeBtn = Instance.new("TextButton", frame)
 closeBtn.Size = UDim2.new(0, 25, 0, 25)
 closeBtn.Position = UDim2.new(1, -30, 0, 5)
@@ -45,7 +42,6 @@ closeBtn.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
 
--- Function to create styled buttons
 local function createButton(name, yPos, callback)
 	local button = Instance.new("TextButton", frame)
 	button.Size = UDim2.new(0.9, 0, 0, 35)
@@ -59,46 +55,19 @@ local function createButton(name, yPos, callback)
 	button.MouseButton1Click:Connect(callback)
 end
 
--- Duplication Logic
 createButton("Dupe Pet", 40, function()
-	local tool = Character:FindFirstChildOfClass("Tool")
-	if tool then
-		tool.Parent = Backpack
-		wait()
-		local newTool = tool:Clone()
-		local newAge = math.random(1, 5)
-		newTool.Name = newTool.Name:gsub("Age %d+", "Age " .. newAge)
-		newTool.Parent = Backpack
-	end
-end)
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/Jay-Devss/Dupe/refs/heads/main/dupe-grow.lua"))()
+	
+	end)
 
 createButton("Dupe Seed", 85, function()
-	local tool = Character:FindFirstChildOfClass("Tool")
-	if tool and tool.Name:find("Seed") then
-		tool.Parent = Backpack
-		wait()
-
-		local baseName, count = tool.Name:match("^(.-)%s%[X(%d+)%]$")
-		if baseName and count then
-			local newCount = tonumber(count) + 1
-			tool.Name = baseName .. " [X" .. newCount .. "]"
-		else
-			tool.Name = tool.Name .. " [X2]"
-		end
-	end
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/Jay-Devss/Dupe/refs/heads/main/dupe-grow.lua"))()
 end)
 
 createButton("Dupe Fruit", 130, function()
-	local tool = Character:FindFirstChildOfClass("Tool")
-	if tool then
-		tool.Parent = Backpack
-		wait()
-		local newTool = tool:Clone()
-		newTool.Parent = Backpack
-	end
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/Jay-Devss/Dupe/refs/heads/main/dupe-grow.lua"))()
 end)
 
--- Resize Handle
 local resizeHandle = Instance.new("Frame", frame)
 resizeHandle.Size = UDim2.new(0, 20, 0, 20)
 resizeHandle.Position = UDim2.new(1, -20, 1, -20)
